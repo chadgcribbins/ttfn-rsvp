@@ -1,0 +1,169 @@
+<!doctype html>
+<!-- Backend-enabled variant: posts to /api/rsvp and shows an Edit link on success. -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>RSVP – Cribbins London Weekend (App)</title>
+    <meta name="description" content="RSVP for the Cribbins London Weekend.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+      body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,Helvetica,Arial}
+      .container{max-width:720px;margin:0 auto;padding:24px 16px 48px}
+      .card{background:#fffdf6;border-radius:24px;padding:24px;box-shadow:0 16px 32px rgba(31,42,68,.15)}
+      .section-title{font-size:24px;font-weight:800;margin:0 0 16px}
+      .label{display:block;font-size:13px;font-weight:700;color:#374151;margin-bottom:8px}
+      .input,.textarea{width:100%;border:2px solid #e8dcc0;border-radius:14px;padding:12px 14px;font-size:16px;background:#fff}
+      .textarea{resize:vertical;min-height:90px}
+      .row{display:grid;grid-template-columns:1fr;gap:12px}
+      @media(min-width:640px){.row.two{grid-template-columns:1fr 1fr}}
+      .btn{width:100%;border:0;border-radius:14px;padding:14px 16px;color:#fff;font-weight:700;font-size:17px;background:linear-gradient(90deg,#243354,#18243e);cursor:pointer}
+      .btn[disabled]{opacity:.5;cursor:not-allowed}
+      .choice{border:2px solid #e8dcc0;border-radius:16px;padding:14px;background:#fff;cursor:pointer}
+      .choice.selected{border-color:#243354;background:#eef2ff;color:#243354}
+      .hidden{display:none!important}
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <section id="form-view" class="card">
+        <h2 class="section-title">RSVP</h2>
+
+        <div class="row two">
+          <div>
+            <label class="label" for="name">Your Name *</label>
+            <input id="name" class="input" type="text" placeholder="John Doe" required>
+          </div>
+          <div>
+            <label class="label" for="email">Email *</label>
+            <input id="email" class="input" type="email" placeholder="john@example.com" required>
+          </div>
+        </div>
+
+        <div>
+          <label class="label" for="phone">Phone (Optional)</label>
+          <input id="phone" class="input" type="tel" placeholder="+44 7XXX XXXXXX">
+        </div>
+
+        <div>
+          <label class="label">I'll be attending... *</label>
+          <div class="row two" id="attendance-group">
+            <button type="button" class="choice" data-attendance="all">All Weekend! 🎉<div style="font-size:12px;color:#6b7280">Everything</div></button>
+            <button type="button" class="choice" data-attendance="partial">Some Events 📅<div style="font-size:12px;color:#6b7280">I'll pick below</div></button>
+            <button type="button" class="choice" data-attendance="none">Can't Make It 😢<div style="font-size:12px;color:#6b7280">Next time!</div></button>
+          </div>
+        </div>
+
+        <div id="events-section" class="hidden" style="margin-top:12px">
+          <label class="label">Select Events You'll Attend</label>
+          <div id="events-list"></div>
+        </div>
+
+        <div style="margin-top:12px">
+          <label class="label" for="notes">Any Notes or Special Requests?</label>
+          <textarea id="notes" class="textarea" rows="3" placeholder="Bringing a plus one? Let us know!"></textarea>
+        </div>
+
+        <button id="submit" class="btn" type="button" disabled>Submit RSVP</button>
+        <p style="font-size:12px;color:#6b7280;text-align:center;margin-top:8px">You'll get a personal link to edit later</p>
+      </section>
+
+      <section id="success-view" class="card hidden" style="margin-top:12px;text-align:center">
+        <div style="width:80px;height:80px;border-radius:50%;background:#10b981;color:#fff;display:grid;place-items:center;font-size:40px;margin:0 auto 12px">✓</div>
+        <h3 style="margin:8px 0 8px;font-size:28px;font-weight:800">RSVP Saved!</h3>
+        <p style="margin:0 0 10px;color:#4b5563">Thanks for letting us know, <span id="success-name"></span>!</p>
+        <p style="margin:0 0 10px;color:#4b5563">You can update your response any time:</p>
+        <a id="edit-link" href="#" style="display:inline-block;font-weight:800;color:#bd3d13">Edit your RSVP</a>
+        <div style="margin-top:12px"><button id="submit-another" class="choice" type="button" style="text-align:center">Submit Another RSVP</button></div>
+      </section>
+    </div>
+
+    <script>
+      (function(){
+        const events = [
+          { id: 'sat-brunch', day: 'Saturday', time: '10:30 AM', name: 'Brunch', location: 'Route Haggerston' },
+          { id: 'sat-lunch', day: 'Saturday', time: '1–5 PM',   name: 'Lunch',  location: 'The Scolts Head' },
+          { id: 'sat-dinner', day: 'Saturday', time: '6:00 PM',   name: 'Dinner', location: 'Tonkotsu East' },
+          { id: 'sun-church', day: 'Sunday',   time: '11:30 AM',  name: 'Morning Service', location: 'Saint Hackney' },
+          { id: 'sun-lunch',  day: 'Sunday',   time: '2–6 PM',    name: 'Lunch',  location: 'Spitalfields Market' },
+          { id: 'sun-movie',  day: 'Sunday',   time: '6/7:30 PM', name: 'Movie Night', location: 'TBD' }
+        ];
+
+        const attendanceGroup = document.getElementById('attendance-group');
+        const eventsSection = document.getElementById('events-section');
+        const eventsList = document.getElementById('events-list');
+        const nameInput = document.getElementById('name');
+        const emailInput = document.getElementById('email');
+        const phoneInput = document.getElementById('phone');
+        const notesInput = document.getElementById('notes');
+        const submitBtn = document.getElementById('submit');
+        const formView = document.getElementById('form-view');
+        const successView = document.getElementById('success-view');
+        const successName = document.getElementById('success-name');
+        const editLink = document.getElementById('edit-link');
+        const submitAnotherBtn = document.getElementById('submit-another');
+
+        let attendance = '';
+
+        function renderEvents(){
+          eventsList.innerHTML = '';
+          ['Saturday','Sunday'].forEach(day => {
+            const dayHeader = document.createElement('div');
+            dayHeader.textContent = day; dayHeader.style.cssText='font-weight:800;color:#4b5563;margin:8px 0';
+            eventsList.appendChild(dayHeader);
+            events.filter(e=>e.day===day).forEach(event => {
+              const row = document.createElement('label');
+              row.style.cssText='display:flex;align-items:flex-start;justify-content:space-between;border:2px solid #e8dcc0;border-radius:14px;padding:12px 14px;margin-bottom:8px';
+              const left = document.createElement('div');
+              left.innerHTML = `<div style="font-weight:700;color:#111827">${event.name}</div><div style="font-size:13px;color:#6b7280">${event.time} • ${event.location}</div>`;
+              const cb = document.createElement('input'); cb.type='checkbox'; cb.value=event.id; cb.style.marginLeft='12px';
+              cb.addEventListener('change', ()=>{ row.style.borderColor = cb.checked ? '#243354' : '#e8dcc0'; validate(); });
+              row.appendChild(left); row.appendChild(cb); eventsList.appendChild(row);
+            });
+          });
+        }
+        renderEvents();
+
+        function getSelectedEventIds(){ return Array.from(eventsList.querySelectorAll('input[type="checkbox"]:checked')).map(cb=>cb.value); }
+
+        function setAttendance(v){
+          attendance = v;
+          Array.from(attendanceGroup.querySelectorAll('.choice')).forEach(btn=>btn.classList.toggle('selected', btn.getAttribute('data-attendance')===v));
+          const showEvents = v==='partial';
+          eventsSection.classList.toggle('hidden', !showEvents);
+          const cbs = eventsList.querySelectorAll('input[type="checkbox"]');
+          if (v==='all') cbs.forEach(cb=>{cb.checked=true; cb.dispatchEvent(new Event('change'));});
+          else cbs.forEach(cb=>{cb.checked=false; cb.dispatchEvent(new Event('change'));});
+          validate();
+        }
+
+        attendanceGroup.addEventListener('click', e=>{ const btn=e.target.closest('.choice'); if(!btn) return; setAttendance(btn.getAttribute('data-attendance')); });
+        [nameInput,emailInput,phoneInput,notesInput].forEach(el=>el.addEventListener('input', validate));
+
+        function validate(){
+          const hasEventIfPartial = attendance!=='partial' || getSelectedEventIds().length>0;
+          submitBtn.disabled = !(nameInput.value.trim() && emailInput.value.trim() && attendance && hasEventIfPartial);
+        }
+
+        submitBtn.addEventListener('click', async ()=>{
+          if (submitBtn.disabled) return;
+          const payload = {
+            name: nameInput.value.trim(), email: emailInput.value.trim(), phone: phoneInput.value.trim(),
+            attendance, selectedEvents: getSelectedEventIds(), notes: notesInput.value.trim()
+          };
+          const r = await fetch('/api/rsvp', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+          const j = await r.json();
+          if (!j.ok) { alert('Error saving RSVP'); return; }
+          successName.textContent = nameInput.value; if (j.editUrl) editLink.href = j.editUrl;
+          formView.classList.add('hidden'); successView.classList.remove('hidden');
+        });
+
+        submitAnotherBtn.addEventListener('click', ()=>{ location.href = location.pathname; });
+      })();
+    </script>
+  </body>
+</html>
+
+

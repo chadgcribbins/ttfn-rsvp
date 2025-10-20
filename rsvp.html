@@ -1,0 +1,559 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>RSVP – Cribbins London Weekend</title>
+    <meta name="description" content="RSVP for the Cribbins London Weekend.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+      :root {
+        /* Warm tan + navy palette inspired by the carousel */
+        --bg-start: #f5e6c6; /* light tan */
+        --bg-end: #ecd7ad;   /* deeper tan */
+        --text: #1f2a44;     /* navy */
+        --muted: #5b6476;    /* muted navy */
+        --border: #e8dcc0;   /* paper edge */
+        --accent: #243354;   /* navy accent */
+        --accent-700: #18243e; /* darker navy */
+        --card: #fffdf6;     /* paper */
+        --soft: #fbf6e8;     /* soft paper */
+        --link: #bd3d13;     /* warm orange link */
+        --weather: #558582;  /* teal-blue from artwork for weather bar */
+      }
+      * { box-sizing: border-box; }
+      html, body { height: 100%; }
+      html { scroll-behavior: smooth; }
+      body {
+        margin: 0;
+        font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+        color: var(--text);
+        background: url('./images/EastLondon.png') center/cover fixed no-repeat;
+        background-color: rgba(0,0,0,0.10); /* subtle dim */
+        background-blend-mode: multiply;
+      }
+      .container {
+        max-width: 720px;
+        margin: 0 auto;
+        padding: 24px 16px 48px;
+      }
+      .header {
+        text-align: center;
+        color: var(--text);
+        padding: 24px 16px 20px;
+        margin-bottom: 16px;
+        border-radius: 20px;
+        border: 2px solid var(--border);
+        background: var(--card);
+      }
+      .header h1 { margin: 6px 0 6px; font-weight: 900; letter-spacing: -0.02em; font-size: 34px; }
+      .header p { margin: 0 0 8px; font-size: 16px; color: var(--muted); }
+      .header .bonus { display:block; background: #ffe9b5; color: #7c3b00; border: 2px solid #f2cf7b; border-radius: 12px; padding: 10px 14px; font-weight: 800; margin: 12px auto 0; max-width: 680px; }
+      .bonus-banner { background: #ffe9b5; color: #7c3b00; border: 2px solid #f2cf7b; border-radius: 12px; padding: 10px 14px; font-weight: 800; text-align: center; margin: 12px 0 16px; }
+      .header .jump { margin-top: 10px; display:inline-block; border: 2px solid var(--accent); color: var(--accent); padding: 10px 16px; border-radius: 999px; font-weight: 800; text-decoration: none; }
+      .header .jump:hover { background: #e9eefb; }
+
+      .card { background: var(--card); border-radius: 24px; padding: 24px; box-shadow: 0 16px 32px rgba(31,42,68,0.15); }
+      .section-title { font-size: 24px; font-weight: 800; margin: 0 0 16px; display: flex; align-items: center; gap: 10px; }
+      .field { margin-bottom: 16px; }
+      .label { display: block; font-size: 13px; font-weight: 700; color: #374151; margin-bottom: 8px; }
+      .input, .textarea {
+        width: 100%;
+        border: 2px solid var(--border);
+        border-radius: 14px;
+        padding: 12px 14px;
+        font-size: 16px;
+        outline: none;
+        transition: border-color .2s ease, box-shadow .2s ease;
+        background: #fff;
+      }
+      .input:focus, .textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(124,58,237,.15); }
+      .textarea { resize: vertical; min-height: 90px; }
+
+      .grid-3 { display: grid; grid-template-columns: 1fr; gap: 12px; }
+      @media (min-width: 720px) { .grid-3 { grid-template-columns: repeat(3, 1fr); } }
+      .choice {
+        border: 2px solid var(--border);
+        border-radius: 16px;
+        padding: 14px;
+        text-align: left;
+        background: #fff;
+        cursor: pointer;
+        transition: border-color .2s ease, background .2s ease, transform .05s ease;
+      }
+      .choice:hover { border-color: #d1d5db; }
+      .choice.selected { border-color: var(--accent); background: #f5f3ff; color: #5b21b6; }
+      .choice .title { font-weight: 700; }
+      .choice .sub { font-size: 13px; color: #6b7280; margin-top: 4px; }
+
+      .events-day { font-weight: 700; color: #4b5563; margin: 8px 0; }
+      .event {
+        display: flex; align-items: flex-start; justify-content: space-between;
+        border: 2px solid var(--border); border-radius: 14px; padding: 12px 14px; margin-bottom: 8px;
+        transition: border-color .2s ease, background .2s ease;
+      }
+      .event.selected { border-color: var(--accent); background: #f5f3ff; }
+      .event .meta { font-size: 13px; color: #6b7280; display: flex; gap: 8px; }
+
+      .preview { background: #f9fafb; border-radius: 12px; padding: 12px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size: 12px; color: #374151; white-space: pre-wrap; }
+
+      .btn {
+        width: 100%;
+        border: 0; border-radius: 14px; padding: 14px 16px;
+        color: #fff; font-weight: 700; font-size: 17px;
+        background: linear-gradient(90deg, var(--accent), var(--accent-700));
+        cursor: pointer; transition: transform .06s ease, filter .2s ease;
+      }
+      .btn:hover { filter: brightness(1.02); }
+      .btn:active { transform: scale(0.99); }
+      .btn[disabled] { opacity: .5; cursor: not-allowed; }
+
+      .help { text-align: center; color: var(--muted); font-size: 12px; margin-top: 12px; }
+
+      .center-card { min-height: calc(100vh - 48px); display: flex; align-items: center; justify-content: center; padding: 24px 16px; }
+      .success { text-align: center; }
+      .success .check { width: 80px; height: 80px; border-radius: 50%; background: #10b981; color: #fff; display: grid; place-items: center; font-size: 40px; margin: 0 auto 12px; }
+      .link-btn { background: transparent; border: 0; color: var(--accent); font-weight: 700; cursor: pointer; }
+
+      .row { display: grid; grid-template-columns: 1fr; gap: 12px; }
+      @media (min-width: 640px) { .row.two { grid-template-columns: 1fr 1fr; } }
+      .hidden { display: none !important; }
+
+      /* Itinerary styles */
+      .itin-card { background: var(--soft); /* warm paper */ }
+      .itin-header { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom: 12px; }
+      .itin-title { font-size: 24px; font-weight: 800; margin: 0; }
+      .itin-sub { color:#4b5563; font-size:14px; margin:0; }
+      .jump { border: 2px solid var(--accent); background:#ffffff; color: var(--accent); padding:10px 14px; border-radius: 999px; font-weight:800; cursor:pointer; }
+      .jump:hover { background:#f5f3ff; }
+      .day { margin-top: 8px; border: 2px solid #f3e7c6; border-radius: 16px; padding: 12px; background:#fffef7; }
+      .day-title { font-weight: 900; font-size: 16px; margin: 0 0 8px; color: #1f2937; }
+      .item-row { display: grid; grid-template-columns: 1fr; gap: 6px; padding: 10px 0; border-top: 1px dashed #e6dec0; }
+      .item-row:first-of-type { border-top: 0; padding-top: 0; }
+      .item-head { display:flex; align-items:baseline; gap:8px; }
+      .item-time { font-weight: 800; color:#374151; min-width: 90px; }
+      .item-name { font-weight: 800; }
+      .links { display:flex; flex-wrap:wrap; gap:8px; font-size: 13px; }
+      .links a, .links a:visited { color: var(--link); text-decoration: none; font-weight: 700; }
+      .links a:hover { text-decoration: underline; }
+
+      /* Weather strip */
+      .weather { display:flex; align-items:center; justify-content:space-between; gap:10px; background: var(--weather); color:#ffffff; border-radius:12px; padding:6px 10px; font-weight:800; }
+      .weather .left { display:flex; align-items:center; gap:8px; }
+      .weather .temps { font-weight:700; color: inherit; }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header class="header">
+        <h1>The Cribbins TTFN London Weekend</h1>
+        <p>A celebration of our London years as we head on a new adventure in Lisbon</p>
+        <p style="font-weight:800;">25–26 October • East London</p>
+        <p class="bonus">🎉 Bonus Celebrations 🎉<br>Niyati & Chad’s Oct Birthdays (Chad hit the big 5‑0!)</p>
+      </header>
+
+      <main>
+        <section class="card itin-card" style="margin-bottom:16px;" id="itinerary">
+          <div class="itin-header">
+            <div>
+              <h2 class="itin-title">Weekend Itinerary</h2>
+              <p class="itin-sub">All the key details in one place</p>
+            </div>
+            <a class="jump" href="#rsvp">Jump to RSVP</a>
+          </div>
+
+          <div class="day">
+            <p class="day-title">Saturday, 25 October</p>
+            <div class="weather" aria-label="Saturday weather">
+              <div class="left"><span>Sat</span> <span>⛅</span></div>
+              <div class="temps">6°C / 11°C • 43°F / 51°F</div>
+            </div>
+
+            <div class="item-row">
+              <div class="item-head"><span class="item-time">10:30 AM</span> <span class="item-name">Brunch — Route Haggerston</span></div>
+              <div class="links">
+                <a href="https://caferoute.co.uk/haggerston/" target="_blank" rel="noopener">Website</a>
+                <a href="https://maps.app.goo.gl/ABNteUucNAKBAiDR9" target="_blank" rel="noopener">Location</a>
+                <a href="https://caferoute.co.uk/wp-content/uploads/2025/06/PDF-Breakfast-Summer-2025-Menu.pdf" target="_blank" rel="noopener">Menu</a>
+              </div>
+            </div>
+
+            <div class="item-row">
+              <div class="item-head"><span class="item-time">1–5 PM</span> <span class="item-name">Lunch — The Scolts Head</span></div>
+              <div class="links">
+                <a href="https://www.thescolthead.co.uk" target="_blank" rel="noopener">Website</a>
+                <a href="https://maps.app.goo.gl/jUqVAe5LyQctxBjB8?g_st=ic" target="_blank" rel="noopener">Location</a>
+                <a href="https://www.thescolthead.co.uk/scolt-head/wp-content/uploads/2018/07/SCOLTHEAD_SAMPLE_MENU_SEPT_2024.pdf" target="_blank" rel="noopener">Menu</a>
+              </div>
+            </div>
+
+            <div class="item-row">
+              <div class="item-head"><span class="item-time">6:00 PM</span> <span class="item-name">Dinner — Tonkotsu East</span></div>
+              <div class="links">
+                <a href="https://tonkotsu.co.uk/locations/east/" target="_blank" rel="noopener">Website</a>
+                <a href="https://maps.app.goo.gl/ir4x1HfnbgPcNfWs7?g_st=ic" target="_blank" rel="noopener">Location</a>
+                <a href="https://tonkotsu.co.uk/menu/ramen/" target="_blank" rel="noopener">Menu</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="day" style="margin-top:12px;">
+            <p class="day-title">Sunday, 26 October</p>
+            <div class="weather" aria-label="Sunday weather">
+              <div class="left"><span>Sun</span> <span>☀️</span></div>
+              <div class="temps">4°C / 9°C • 39°F / 49°F</div>
+            </div>
+
+            <div class="item-row">
+              <div class="item-head"><span class="item-time">11:30 AM</span> <span class="item-name">Morning Service — Saint Hackney</span></div>
+              <div class="links">
+                <a href="https://saint.church" target="_blank" rel="noopener">Website</a>
+                <a href="https://maps.app.goo.gl/V2XRCCARUKaGMg1q9?g_st=ipc" target="_blank" rel="noopener">Location</a>
+                <a href="https://saint.church/sunday/" target="_blank" rel="noopener">What’s on</a>
+              </div>
+            </div>
+
+            <div class="item-row">
+              <div class="item-head"><span class="item-time">2–6 PM</span> <span class="item-name">Lunch — Spitalfields Market</span></div>
+              <div class="links">
+                <a href="https://www.spitalfields.co.uk" target="_blank" rel="noopener">Website</a>
+                <a href="https://maps.app.goo.gl/ka2j4pL71syZUHHo9" target="_blank" rel="noopener">Location</a>
+                <a href="https://www.spitalfields.co.uk/food-drinks/" target="_blank" rel="noopener">Food & drinks</a>
+              </div>
+            </div>
+
+            <div class="item-row">
+              <div class="item-head"><span class="item-time">6:00 / 7:30 PM</span> <span class="item-name">Evening Movie — Options</span></div>
+              <div style="color:#4b5563; font-size:14px;">We'll decide based on vibes; here are a few picks:</div>
+              <ul style="margin:6px 0 0 16px; color:#374151;">
+                <li>Hackney Picturehouse — PHOTOMONTH Free Party: A Folk History (7:30PM)</li>
+                <li>Rich Mix — Skateboard Film Club: This Is Skateboarding (6:00PM)</li>
+                <li>Or Stratford — TBD</li>
+              </ul>
+            </div>
+          </div>
+
+        </section>
+        <section id="form-view" class="card">
+          <a id="rsvp"></a>
+          <h2 class="section-title">RSVP</h2>
+
+          <div class="row two">
+            <div class="field">
+              <label class="label" for="name">Your Name *</label>
+              <input id="name" class="input" type="text" placeholder="John Doe" required>
+            </div>
+            <div class="field">
+              <label class="label" for="email">Email *</label>
+              <input id="email" class="input" type="email" placeholder="john@example.com" required>
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="label" for="phone">Phone (Optional)</label>
+            <input id="phone" class="input" type="tel" placeholder="+44 7XXX XXXXXX">
+          </div>
+
+          <div class="field">
+            <label class="label">I'll be attending... *</label>
+            <div class="grid-3" id="attendance-group">
+              <button type="button" class="choice" data-attendance="all">
+                <div class="title">All Weekend! 🎉</div>
+                <div class="sub">Count me in for everything</div>
+              </button>
+              <button type="button" class="choice" data-attendance="partial">
+                <div class="title">Some Events 📅</div>
+                <div class="sub">I'll pick below</div>
+              </button>
+              <button type="button" class="choice" data-attendance="none">
+                <div class="title">Sorry Can't Make It 😢</div>
+                <div class="sub">But we will visit 🇵🇹!</div>
+              </button>
+            </div>
+          </div>
+
+          <div id="events-section" class="field hidden">
+            <label class="label">Select Events You'll Attend</label>
+            <div id="events-list"></div>
+          </div>
+
+          <div class="field">
+            <label class="label" for="notes">Any Notes or Special Requests?</label>
+            <textarea id="notes" class="textarea" rows="3" placeholder="Bringing a plus one? Let us know!"></textarea>
+          </div>
+
+          <div id="preview-wrap" class="field hidden">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
+              <span class="label" style="margin:0">Preview Your RSVP</span>
+              <button id="copy-preview" class="link-btn" type="button">Copy</button>
+            </div>
+            <pre id="preview" class="preview"></pre>
+          </div>
+
+          <button id="submit" class="btn" type="button" disabled>Generate & Copy RSVP</button>
+          <div class="help">This copies your RSVP so you can send via WhatsApp, text, or DM</div>
+        </section>
+
+        <section id="success-view" class="center-card hidden">
+          <div class="card success" style="max-width:480px; width:100%">
+            <div class="check">✓</div>
+            <h3 style="margin:8px 0 8px; font-size:28px; font-weight:800;">RSVP Saved!</h3>
+            <p style="margin:0 0 16px; color:#4b5563;">Thanks for letting us know, <span id="success-name"></span>! Your RSVP has been copied to your clipboard.</p>
+            <div style="background:#f9fafb; border-radius:12px; padding:12px; text-align:left; margin-bottom:16px;">
+              <div class="label" style="margin-bottom:4px;">Next Step</div>
+              <p style="margin:0; color:#6b7280; font-size:14px;">Please send your RSVP via WhatsApp, Instagram DM, or text message to the organizers.</p>
+            </div>
+            <div class="row two">
+              <button id="copy-again" class="btn" type="button">Copy RSVP Again</button>
+              <button id="submit-another" class="choice" type="button" style="text-align:center;">Submit Another RSVP</button>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script>
+      (function() {
+        const events = [
+          { id: 'sat-brunch', day: 'Saturday', time: '10:30 AM', name: 'Brunch', location: 'Route Haggerston' },
+          { id: 'sat-lunch', day: 'Saturday', time: '1–5 PM',   name: 'Lunch',  location: 'The Scolts Head' },
+          { id: 'sat-dinner', day: 'Saturday', time: '6:00 PM',   name: 'Dinner', location: 'Tonkotsu East' },
+          { id: 'sun-church', day: 'Sunday',   time: '11:30 AM',  name: 'Morning Service', location: 'Saint Hackney' },
+          { id: 'sun-lunch',  day: 'Sunday',   time: '2–6 PM',    name: 'Lunch',  location: 'Spitalfields Market' },
+          { id: 'sun-movie',  day: 'Sunday',   time: '6/7:30 PM', name: 'Movie Night', location: 'TBD' }
+        ];
+
+        // Elements
+        const formView = document.getElementById('form-view');
+        const successView = document.getElementById('success-view');
+        const attendanceGroup = document.getElementById('attendance-group');
+        const eventsSection = document.getElementById('events-section');
+        const eventsList = document.getElementById('events-list');
+        const nameInput = document.getElementById('name');
+        const emailInput = document.getElementById('email');
+        const phoneInput = document.getElementById('phone');
+        const notesInput = document.getElementById('notes');
+        const previewWrap = document.getElementById('preview-wrap');
+        const preview = document.getElementById('preview');
+        const copyPreviewBtn = document.getElementById('copy-preview');
+        const submitBtn = document.getElementById('submit');
+        const copyAgainBtn = document.getElementById('copy-again');
+        const submitAnotherBtn = document.getElementById('submit-another');
+        const successName = document.getElementById('success-name');
+
+        let attendance = '';
+
+        function renderEvents() {
+          eventsList.innerHTML = '';
+          ['Saturday', 'Sunday'].forEach(function(day) {
+            const dayHeader = document.createElement('div');
+            dayHeader.className = 'events-day';
+            dayHeader.textContent = day;
+            eventsList.appendChild(dayHeader);
+
+            events.filter(function(e){ return e.day === day; }).forEach(function(event) {
+              const wrapper = document.createElement('label');
+              wrapper.className = 'event';
+
+              const left = document.createElement('div');
+              const title = document.createElement('div');
+              title.style.fontWeight = '700';
+              title.style.color = '#111827';
+              title.textContent = event.name;
+
+              const meta = document.createElement('div');
+              meta.className = 'meta';
+              meta.textContent = event.time + ' • ' + event.location;
+
+              left.appendChild(title);
+              left.appendChild(meta);
+
+              const input = document.createElement('input');
+              input.type = 'checkbox';
+              input.value = event.id;
+              input.style.marginLeft = '12px';
+
+              input.addEventListener('change', function() {
+                wrapper.classList.toggle('selected', input.checked);
+                updatePreviewVisibility();
+              });
+
+              wrapper.appendChild(left);
+              wrapper.appendChild(input);
+              eventsList.appendChild(wrapper);
+            });
+          });
+        }
+
+        function setAttendance(value) {
+          attendance = value;
+          // Visual state
+          Array.prototype.forEach.call(attendanceGroup.querySelectorAll('.choice'), function(btn) {
+            btn.classList.toggle('selected', btn.getAttribute('data-attendance') === value);
+          });
+          // Toggle sections
+          const showEvents = value === 'partial';
+          eventsSection.classList.toggle('hidden', !showEvents);
+
+          // Check/uncheck all based on value
+          const checkboxes = eventsList.querySelectorAll('input[type="checkbox"]');
+          if (value === 'all') {
+            checkboxes.forEach(function(cb) { cb.checked = true; cb.dispatchEvent(new Event('change')); });
+          } else if (value === 'none') {
+            checkboxes.forEach(function(cb) { cb.checked = false; cb.dispatchEvent(new Event('change')); });
+          } else if (value === 'partial') {
+            // default to none selected; user must pick
+            checkboxes.forEach(function(cb) { cb.checked = false; cb.dispatchEvent(new Event('change')); });
+          }
+
+          validate();
+          renderPreview();
+        }
+
+        function getSelectedEventIds() {
+          return Array.prototype.slice.call(eventsList.querySelectorAll('input[type="checkbox"]:checked')).map(function(cb) { return cb.value; });
+        }
+
+        function generateRSVPText() {
+          var selectedEvents = getSelectedEventIds();
+          var lines = [];
+          var eventNames = selectedEvents.map(function(id){
+            var ev = events.find(function(e){ return e.id === id; });
+            return ev ? (ev.day + ' ' + ev.time + ': ' + ev.name) : '';
+          }).filter(Boolean).join('\n');
+
+          lines.push('🎉 RSVP for Cribbins London Weekend 🎉');
+          lines.push('');
+          lines.push('Name: ' + nameInput.value);
+          lines.push('Email: ' + emailInput.value);
+          lines.push('Phone: ' + (phoneInput.value || 'Not provided'));
+          lines.push('');
+          lines.push('Attending: ' + (attendance === 'all' ? '✅ All Weekend!' : attendance === 'partial' ? '📅 Selected Events' : '😢 Unable to Attend'));
+          lines.push('');
+          if (attendance !== 'none' && selectedEvents.length > 0) {
+            lines.push('Events:');
+            lines.push(eventNames);
+          }
+          if (notesInput.value.trim()) lines.push('\nNotes: ' + notesInput.value.trim());
+          lines.push('');
+          lines.push('Sent: ' + new Date().toLocaleString());
+          return lines.join('\n');
+        }
+
+        function copyToClipboard(text) {
+          if (navigator.clipboard && window.isSecureContext) {
+            return navigator.clipboard.writeText(text);
+          }
+          // Fallback
+          return new Promise(function(resolve, reject) {
+            var ta = document.createElement('textarea');
+            ta.value = text;
+            ta.style.position = 'fixed';
+            ta.style.left = '-9999px';
+            document.body.appendChild(ta);
+            ta.focus();
+            ta.select();
+            try {
+              var ok = document.execCommand('copy');
+              document.body.removeChild(ta);
+              ok ? resolve() : reject(new Error('Copy failed'));
+            } catch (e) {
+              document.body.removeChild(ta);
+              reject(e);
+            }
+          });
+        }
+
+        function renderPreview() {
+          const hasEventIfPartial = attendance !== 'partial' || getSelectedEventIds().length > 0;
+          const ready = nameInput.value.trim() && emailInput.value.trim() && attendance && hasEventIfPartial;
+          previewWrap.classList.toggle('hidden', !ready);
+          if (ready) {
+            preview.textContent = generateRSVPText();
+          } else {
+            preview.textContent = '';
+          }
+        }
+
+        function validate() {
+          const hasEventIfPartial = attendance !== 'partial' || getSelectedEventIds().length > 0;
+          const valid = nameInput.value.trim() && emailInput.value.trim() && attendance && hasEventIfPartial;
+          submitBtn.disabled = !valid;
+        }
+
+        function resetForm() {
+          nameInput.value = '';
+          emailInput.value = '';
+          phoneInput.value = '';
+          notesInput.value = '';
+          setAttendance('');
+          Array.prototype.forEach.call(attendanceGroup.querySelectorAll('.choice'), function(btn) { btn.classList.remove('selected'); });
+          eventsList.querySelectorAll('input[type="checkbox"]').forEach(function(cb) { cb.checked = false; cb.dispatchEvent(new Event('change')); });
+          renderPreview();
+          validate();
+        }
+
+        // Wire up
+        renderEvents();
+
+        attendanceGroup.addEventListener('click', function(e) {
+          const btn = e.target.closest('.choice');
+          if (!btn) return;
+          const value = btn.getAttribute('data-attendance');
+          setAttendance(value);
+        });
+
+        [nameInput, emailInput, phoneInput, notesInput].forEach(function(el) {
+          el.addEventListener('input', function(){ validate(); renderPreview(); });
+        });
+
+        copyPreviewBtn.addEventListener('click', function(){
+          copyToClipboard(generateRSVPText()).then(function(){
+            copyPreviewBtn.textContent = 'Copied!';
+            setTimeout(function(){ copyPreviewBtn.textContent = 'Copy'; }, 1800);
+          });
+        });
+
+        submitBtn.addEventListener('click', function(){
+          if (!nameInput.value.trim() || !emailInput.value.trim() || !attendance) {
+            alert('Please fill in all required fields.');
+            return;
+          }
+          const payload = {
+            name: nameInput.value,
+            email: emailInput.value,
+            phone: phoneInput.value,
+            attendance: attendance,
+            selectedEvents: getSelectedEventIds(),
+            notes: notesInput.value,
+            timestamp: new Date().toISOString()
+          };
+          console.log('RSVP Submitted:', payload);
+
+          const text = generateRSVPText();
+          copyToClipboard(text).finally(function(){
+            successName.textContent = nameInput.value;
+            formView.classList.add('hidden');
+            successView.classList.remove('hidden');
+          });
+        });
+
+        copyAgainBtn.addEventListener('click', function(){
+          copyToClipboard(generateRSVPText()).then(function(){
+            alert('RSVP copied to clipboard again!');
+          });
+        });
+
+        submitAnotherBtn.addEventListener('click', function(){
+          successView.classList.add('hidden');
+          formView.classList.remove('hidden');
+          resetForm();
+        });
+      })();
+    </script>
+  </body>
+  </html>
+
+

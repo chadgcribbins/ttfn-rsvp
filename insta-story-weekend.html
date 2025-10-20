@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instagram Story - Cribbins TTFN London Weekend</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Futura', 'Avant Garde', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #1a1a1a;
+            display: grid;
+            place-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            overflow: hidden;
+        }
+        
+        .story-container {
+            /* Responsive 9:16 frame that fits viewport */
+            width: min(1080px, calc(100vw - 40px), calc((100vh - 40px) * 9 / 16));
+            aspect-ratio: 9 / 16;
+            height: auto;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        .story-slide {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        
+        .story-slide.active {
+            opacity: 1;
+        }
+        
+        /* Slide 1 - Lisbon Hello */
+        .slide-1 {
+            background-image: linear-gradient(135deg, rgba(232,180,160,0.6), rgba(168,196,192,0.6)), url('images/Alcantara.png');
+            background-position: center;
+            background-size: cover;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .slide-1 .photo-placeholder {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 800px;
+            height: 800px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            color: rgba(0,0,0,0.3);
+            border: 8px solid rgba(255,255,255,0.5);
+        }
+        
+        .slide-1 .travel-badge {
+            position: absolute;
+            bottom: 180px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #2A5A52;
+            color: #F5DEB3;
+            padding: 40px 80px;
+            border-radius: 100px;
+            font-size: 72px;
+            font-weight: 700;
+            letter-spacing: 8px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+        
+        .slide-1 .wave {
+            position: absolute;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 80px;
+        }
+        
+        /* Slide 2 - Passport Stamps */
+        .slide-2 {
+            background: #F5DEB3;
+            padding: 80px 60px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .passport-page {
+            background: #FFF9F0;
+            width: 900px;
+            height: 1200px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            padding: 60px;
+            position: relative;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            grid-gap: 40px;
+        }
+        
+        .stamp {
+            width: 350px;
+            height: 280px;
+            position: relative;
+            transform: rotate(-5deg);
+        }
+        
+        .stamp:nth-child(2) { transform: rotate(3deg); }
+        .stamp:nth-child(3) { transform: rotate(-2deg); }
+        .stamp:nth-child(4) { transform: rotate(4deg); }
+        
+        .stamp.portugal {
+            grid-column: span 2;
+            width: 500px;
+            height: 400px;
+            margin: 0 auto;
+            transform: rotate(-3deg) scale(1.1);
+        }
+        
+        .stamp-border {
+            width: 100%;
+            height: 100%;
+            border: 6px solid;
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            position: relative;
+            padding: 20px;
+        }
+        
+        .stamp:nth-child(1) .stamp-border { border-color: #E74C3C; color: #E74C3C; }
+        .stamp:nth-child(2) .stamp-border { border-color: #3498DB; color: #3498DB; }
+        .stamp:nth-child(3) .stamp-border { border-color: #2ECC71; color: #2ECC71; }
+        .stamp.portugal .stamp-border { 
+            border-color: #C0392B; 
+            color: #C0392B;
+            background: rgba(192, 57, 43, 0.05);
+        }
+        
+        .stamp-country {
+            font-size: 36px;
+            margin-bottom: 10px;
+            letter-spacing: 4px;
+        }
+        
+        .stamp-date {
+            font-size: 28px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .stamp-icon {
+            font-size: 60px;
+            margin: 20px 0;
+        }
+        
+        .portugal .stamp-country {
+            font-size: 48px;
+        }
+        
+        .portugal .stamp-date {
+            font-size: 36px;
+            font-weight: 900;
+        }
+        
+        .portugal .stamp-icon {
+            font-size: 80px;
+        }
+        
+        .slide-2-text {
+            position: absolute;
+            bottom: 120px;
+            left: 60px;
+            right: 60px;
+            background: #2A5A52;
+            color: white;
+            padding: 40px;
+            border-radius: 30px;
+            font-size: 36px;
+            text-align: center;
+            font-weight: 600;
+            line-height: 1.4;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+        }
+        
+        /* Slide 3 - Emotional Message */
+        .slide-3 {
+            background: linear-gradient(135deg, #E8B4A0 0%, #6A8D88 100%);
+            padding: 100px 60px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .message-card {
+            background: rgba(255,255,255,0.95);
+            border-radius: 40px;
+            padding: 80px 60px;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.2);
+        }
+        
+        .message-text {
+            font-size: 34px;
+            line-height: 1.6;
+            color: #2A5A52;
+            font-weight: 500;
+            text-align: left;
+        }
+        
+        .message-text .highlight {
+            background: linear-gradient(180deg, transparent 60%, #F4D03F 60%);
+            padding: 0 8px;
+            font-weight: 700;
+        }
+        
+        /* Slide 4 - Title Card */
+        .slide-4 {
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1920"><rect fill="%236A8D88"/><rect x="0" y="1400" width="1080" height="520" fill="%23E8B4A0" opacity="0.3"/><rect x="0" y="1600" width="1080" height="320" fill="%23C0392B" opacity="0.2"/></svg>');
+            background-size: cover;
+            padding: 100px 60px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        
+        .title-block {
+            background: rgba(255,255,255,0.95);
+            border-radius: 40px;
+            padding: 80px 60px;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.3);
+            width: 100%;
+        }
+        
+        .title-block h1 {
+            font-size: 72px;
+            font-weight: 900;
+            color: #2A5A52;
+            line-height: 1.1;
+            margin-bottom: 30px;
+            letter-spacing: -2px;
+        }
+        
+        .title-block .ttfn {
+            color: #C0392B;
+            font-size: 84px;
+        }
+        
+        .title-block .subtitle {
+            font-size: 32px;
+            color: #6A8D88;
+            font-weight: 500;
+            margin-bottom: 40px;
+            line-height: 1.4;
+        }
+        
+        .title-block .date-loc {
+            font-size: 36px;
+            font-weight: 700;
+            color: #2A5A52;
+            padding: 25px 50px;
+            border: 4px solid #2A5A52;
+            border-radius: 100px;
+            display: inline-block;
+            margin-bottom: 50px;
+        }
+        
+        .birthday-bonus {
+            background: #F4D03F;
+            border-radius: 30px;
+            padding: 40px;
+            margin-top: 40px;
+        }
+        
+        .birthday-bonus .bonus-label {
+            font-size: 28px;
+            font-weight: 700;
+            color: #2A5A52;
+            margin-bottom: 15px;
+        }
+        
+        .birthday-bonus .birthday-names {
+            font-size: 32px;
+            color: #C0392B;
+            font-weight: 600;
+        }
+        
+        /* Slides 5 & 6 - Itinerary with mid-century poster backgrounds */
+        .slide-5, .slide-6 {
+            background-size: cover;
+            background-position: center;
+            padding: 80px 60px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .slide-5 {
+            background-image: linear-gradient(180deg, rgba(0,0,0,0.15), rgba(0,0,0,0.35)), url('images/EastLondon.png');
+            background-position: center;
+            background-size: cover;
+        }
+        
+        .slide-6 {
+            background-image: linear-gradient(180deg, rgba(0,0,0,0.15), rgba(0,0,0,0.35)), url('images/HackneyWick.png');
+            background-position: center;
+            background-size: cover;
+        }
+        
+        .day-card {
+            background: rgba(255,255,255,0.95);
+            border-radius: 40px;
+            padding: 60px 50px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            margin-bottom: 40px;
+        }
+        
+        .day-title {
+            font-size: 80px;
+            font-weight: 900;
+            color: #2A5A52;
+            margin-bottom: 20px;
+            letter-spacing: -2px;
+        }
+        
+        .day-date {
+            font-size: 32px;
+            color: #6A8D88;
+            margin-bottom: 50px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .venue-list {
+            display: flex;
+            flex-direction: column;
+            gap: 35px;
+        }
+        
+        .venue-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 30px;
+        }
+        
+        .venue-emoji {
+            width: 80px;
+            height: 80px;
+            background: #F4D03F;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            flex-shrink: 0;
+        }
+        
+        .venue-details {
+            flex: 1;
+        }
+        
+        .venue-time {
+            font-size: 24px;
+            font-weight: 700;
+            color: #C0392B;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+        
+        .venue-name {
+            font-size: 48px;
+            font-weight: 900;
+            color: #2A5A52;
+            line-height: 1.1;
+            margin-bottom: 8px;
+        }
+        
+        .venue-type {
+            font-size: 26px;
+            color: #6A8D88;
+            font-weight: 500;
+        }
+        
+        /* Slide 7 - Contact */
+        .slide-7 {
+            background: linear-gradient(135deg, #C0392B 0%, #E8B4A0 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 80px 60px;
+        }
+        
+        .contact-card {
+            background: white;
+            border-radius: 40px;
+            padding: 80px 60px;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.3);
+            text-align: center;
+            width: 100%;
+        }
+        
+        .contact-title {
+            font-size: 72px;
+            font-weight: 900;
+            color: #2A5A52;
+            margin-bottom: 60px;
+            letter-spacing: -2px;
+        }
+        
+        .contact-option {
+            background: #F5F5F5;
+            border-radius: 30px;
+            padding: 40px;
+            margin: 30px 0;
+            font-size: 40px;
+            font-weight: 700;
+            color: #2A5A52;
+            border: 4px solid transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .contact-option:hover {
+            border-color: #C0392B;
+            background: #FFF9F0;
+        }
+        
+        /* Slide 8 - Closing */
+        .slide-8 {
+            background: linear-gradient(135deg, #6A8D88 0%, #E8B4A0 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 100px 60px;
+            text-align: center;
+        }
+        
+        .closing-message {
+            background: rgba(255,255,255,0.95);
+            border-radius: 40px;
+            padding: 80px 60px;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.3);
+        }
+        
+        .closing-text {
+            font-size: 42px;
+            line-height: 1.5;
+            color: #2A5A52;
+            font-weight: 600;
+            margin-bottom: 50px;
+        }
+        
+        .lisbon-invite {
+            font-size: 48px;
+            font-weight: 900;
+            color: #C0392B;
+            padding: 30px 60px;
+            border: 4px solid #C0392B;
+            border-radius: 100px;
+            display: inline-block;
+            margin-top: 30px;
+        }
+        
+        .plane-icon {
+            display: inline-block;
+            margin: 0 15px;
+            font-size: 56px;
+        }
+        
+        .navigation {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 100;
+        }
+        
+        .nav-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.4);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-dot.active {
+            background: white;
+            width: 40px;
+            border-radius: 6px;
+        }
+        
+        /* scaling handled via JS for all viewport sizes */
+    </style>
+</head>
+<body>
+    <div class="story-container">
+        <!-- Slide 1: Lisbon Hello -->
+        <div class="story-slide slide-1 active">
+            <div class="photo-placeholder">[Your Lisbon Photo Here]</div>
+            <div class="travel-badge">LIS → LON</div>
+            <div class="wave">👋 Hi!</div>
+        </div>
+        
+        <!-- Slide 2: Passport Stamps -->
+        <div class="story-slide slide-2">
+            <div class="passport-page">
+                <div class="stamp">
+                    <div class="stamp-border">
+                        <div class="stamp-country">LONDON</div>
+                        <div class="stamp-icon">🇬🇧</div>
+                        <div class="stamp-date">MAR 2015</div>
+                    </div>
+                </div>
+                <div class="stamp">
+                    <div class="stamp-border">
+                        <div class="stamp-country">PARIS</div>
+                        <div class="stamp-icon">🗼</div>
+                        <div class="stamp-date">JUN 2018</div>
+                    </div>
+                </div>
+                <div class="stamp">
+                    <div class="stamp-border">
+                        <div class="stamp-country">TOKYO</div>
+                        <div class="stamp-icon">🗾</div>
+                        <div class="stamp-date">DEC 2019</div>
+                    </div>
+                </div>
+                <div class="stamp portugal">
+                    <div class="stamp-border">
+                        <div class="stamp-country">PORTUGAL</div>
+                        <div class="stamp-icon">🇵🇹</div>
+                        <div class="stamp-date">OCT 2025</div>
+                        <div style="margin-top: 20px; font-size: 24px;">VISA APPROVED</div>
+                    </div>
+                </div>
+            </div>
+            <div class="slide-2-text">
+                The Cribbins Clan is back in town for the half term break to officially get our Visa Stamps.
+            </div>
+        </div>
+        
+        <!-- Slide 3: The Plan -->
+        <div class="story-slide slide-3">
+            <div class="message-card">
+                <div class="message-text">
+                    We'd love to celebrate with you if we can. As it's hard to get folks to one spot, we decided to set a weekend itinerary and invite all of you to join us throughout the weekend at any event that is convenient for you.
+                    <br><br>
+                    We've spent <span class="highlight">almost half our lives</span> here in London, got married, had a family, started businesses, traveled the world. 
+                    <br><br>
+                    There have been a lot of memories to cherish but most importantly it's been about <span class="highlight">you all</span> and we would love to get a cuddle before we head back to our new adventure in Lisbon.
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 4: Title -->
+        <div class="story-slide slide-4">
+            <div class="title-block">
+                <h1>The Cribbins<br><span class="ttfn">TTFN</span><br>London Weekend</h1>
+                <div class="subtitle">A celebration of East London<br>with a few of our dear friends</div>
+                <div class="date-loc">25-26 October • Hackney</div>
+                
+                <div class="birthday-bonus">
+                    <div class="bonus-label">🎉 Bonus Celebrations 🎉</div>
+                    <div class="birthday-names">Niyati & Chad's October Birthdays<br>Chad hits the big 5-0!</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 5: Saturday -->
+        <div class="story-slide slide-5">
+            <div class="day-card">
+                <h2 class="day-title">SATURDAY</h2>
+                <div class="day-date">
+                    <span>October 25</span>
+                    <span>☀️ 43-51°F</span>
+                </div>
+                <div class="venue-list">
+                    <div class="venue-item">
+                        <div class="venue-emoji">☕</div>
+                        <div class="venue-details">
+                            <div class="venue-time">10:30 AM</div>
+                            <div class="venue-name">Route Haggerston</div>
+                            <div class="venue-type">Proper Brunch Vibes</div>
+                        </div>
+                    </div>
+                    <div class="venue-item">
+                        <div class="venue-emoji">🍺</div>
+                        <div class="venue-details">
+                            <div class="venue-time">1:00 - 5:00 PM</div>
+                            <div class="venue-name">The Scolts Head</div>
+                            <div class="venue-type">Gastropub Excellence</div>
+                        </div>
+                    </div>
+                    <div class="venue-item">
+                        <div class="venue-emoji">🍜</div>
+                        <div class="venue-details">
+                            <div class="venue-time">6:00 PM</div>
+                            <div class="venue-name">Tonkotsu East</div>
+                            <div class="venue-type">Ramen & Cocktails</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 6: Sunday -->
+        <div class="story-slide slide-6">
+            <div class="day-card">
+                <h2 class="day-title">SUNDAY</h2>
+                <div class="day-date">
+                    <span>October 26</span>
+                    <span>☀️ 39-49°F</span>
+                </div>
+                <div class="venue-list">
+                    <div class="venue-item">
+                        <div class="venue-emoji">⛪</div>
+                        <div class="venue-details">
+                            <div class="venue-time">11:30 AM</div>
+                            <div class="venue-name">Saint Hackney</div>
+                            <div class="venue-type">Sunday Service</div>
+                        </div>
+                    </div>
+                    <div class="venue-item">
+                        <div class="venue-emoji">🎪</div>
+                        <div class="venue-details">
+                            <div class="venue-time">2:00 - 6:00 PM</div>
+                            <div class="venue-name">Spitalfields Market</div>
+                            <div class="venue-type">Market Feast & Explore</div>
+                        </div>
+                    </div>
+                    <div class="venue-item">
+                        <div class="venue-emoji">🎬</div>
+                        <div class="venue-details">
+                            <div class="venue-time">6:00/7:30 PM</div>
+                            <div class="venue-name">Cinema TBD</div>
+                            <div class="venue-type">Movie Night Options</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 7: Contact -->
+        <div class="story-slide slide-7">
+            <div class="contact-card">
+                <h2 class="contact-title">Join Us!</h2>
+                <div class="contact-option">📱 DM Me</div>
+                <div class="contact-option">💬 Reply to Story</div>
+                <div class="contact-option">📲 WhatsApp</div>
+            </div>
+        </div>
+        
+        <!-- Slide 8: Closing -->
+        <div class="story-slide slide-8">
+            <div class="closing-message">
+                <div class="closing-text">
+                    We never say goodbye,<br>
+                    it's always a<br>
+                    <strong>'Till we meet again'</strong><br>
+                    kinda vibe.
+                </div>
+                <div class="lisbon-invite">
+                    <span class="plane-icon">✈️</span>
+                    Please come see us in Lisbon
+                    <span class="plane-icon">✈️</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Navigation -->
+        <div class="navigation">
+            <div class="nav-dot active" onclick="showSlide(0)"></div>
+            <div class="nav-dot" onclick="showSlide(1)"></div>
+            <div class="nav-dot" onclick="showSlide(2)"></div>
+            <div class="nav-dot" onclick="showSlide(3)"></div>
+            <div class="nav-dot" onclick="showSlide(4)"></div>
+            <div class="nav-dot" onclick="showSlide(5)"></div>
+            <div class="nav-dot" onclick="showSlide(6)"></div>
+            <div class="nav-dot" onclick="showSlide(7)"></div>
+        </div>
+    </div>
+    
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.story-slide');
+        const dots = document.querySelectorAll('.nav-dot');
+
+        function showSlide(index) {
+            slides.forEach(slide => slide.classList.remove('active'));
+            dots.forEach(dot => dot.classList.remove('active'));
+            slides[index].classList.add('active');
+            dots[index].classList.add('active');
+            currentSlide = index;
+        }
+
+        // Fit story to viewport with safe margins
+        function fitToViewport() {
+            const container = document.querySelector('.story-container');
+            const vw = window.innerWidth;
+            const vh = window.innerHeight;
+            const targetW = 1080;
+            const targetH = 1920;
+            const scale = Math.min((vw - 20) / targetW, (vh - 20) / targetH);
+            container.style.transform = `scale(${Math.max(scale, 0.2)})`;
+            container.style.transformOrigin = 'center center';
+        }
+
+        window.addEventListener('resize', fitToViewport);
+        window.addEventListener('load', () => {
+            fitToViewport();
+            showSlide(0);
+        });
+
+        // Auto-advance slides every 5 seconds
+        setInterval(() => {
+            currentSlide = (currentSlide + 1) % slides.length;
+            showSlide(currentSlide);
+        }, 5000);
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') {
+                currentSlide = (currentSlide + 1) % slides.length;
+                showSlide(currentSlide);
+            } else if (e.key === 'ArrowLeft') {
+                currentSlide = (currentSlide - 1 + slides.length) % slides.length;
+                showSlide(currentSlide);
+            }
+        });
+    </script>
+</body>
+</html>

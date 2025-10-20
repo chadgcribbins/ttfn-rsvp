@@ -1,0 +1,69 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Edit RSVP</title>
+<style>
+body{font:16px/1.4 Inter,system-ui;-webkit-font-smoothing:antialiased;margin:24px;background:#fffdf6}
+.wrap{max-width:720px;margin:0 auto}
+label{font-weight:700;display:block;margin:.75rem 0 .25rem}
+input,textarea,select,button{font:inherit}
+input,textarea,select{width:100%;padding:.6rem;border:2px solid #e5e7eb;border-radius:10px;background:#fff}
+button{margin-top:12px;padding:.7rem 1rem;border:0;border-radius:10px;background:#243354;color:#fff;font-weight:800}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+</style>
+<div class="wrap">
+  <h1>Edit your RSVP</h1>
+  <div id="status"></div>
+  <div class="row">
+    <div><label>Name</label><input id="name"></div>
+    <div><label>Email</label><input id="email"></div>
+  </div>
+  <label>Phone</label><input id="phone">
+  <label>Attendance</label>
+  <select id="attendance">
+    <option value="all">All weekend</option>
+    <option value="partial">Some events</option>
+    <option value="none">Can't make it</option>
+  </select>
+  <label>Selected Events (comma separated ids)</label>
+  <input id="events" placeholder="sat-brunch,sat-lunch">
+  <label>Notes</label>
+  <textarea id="notes" rows="3"></textarea>
+  <button id="save">Save Changes</button>
+</div>
+<script>
+const qs = new URLSearchParams(location.search);
+const token = qs.get('token');
+const $ = id => document.getElementById(id);
+if (!token) { document.getElementById('status').textContent = 'Missing token.'; throw new Error('no token'); }
+
+fetch('/api/rsvp?token=' + encodeURIComponent(token))
+  .then(r => r.json()).then(({ ok, rsvp, error }) => {
+    if (!ok) throw new Error(error || 'load failed');
+    $('name').value = rsvp.name || '';
+    $('email').value = rsvp.email || '';
+    $('phone').value = rsvp.phone || '';
+    $('attendance').value = rsvp.attendance || '';
+    $('events').value = (rsvp.selectedEvents || []).join(',');
+    $('notes').value = rsvp.notes || '';
+  }).catch(e => { document.getElementById('status').textContent = e.message; });
+
+$('save').onclick = async () => {
+  const payload = {
+    token,
+    name: $('name').value.trim(),
+    email: $('email').value.trim(),
+    phone: $('phone').value.trim(),
+    attendance: $('attendance').value,
+    selectedEvents: $('events').value.split(',').map(s => s.trim()).filter(Boolean),
+    notes: $('notes').value.trim()
+  };
+  const r = await fetch('/api/rsvp?token=' + encodeURIComponent(token), {
+    method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+  });
+  const j = await r.json();
+  alert(j.ok ? 'Saved!' : ('Error: ' + (j.error || 'failed')));
+};
+</script>
+
+

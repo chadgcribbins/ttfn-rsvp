@@ -1,0 +1,45 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RSVP Dashboard</title>
+<style>
+body{font:16px/1.4 Inter,system-ui;margin:24px;background:#fffdf6}
+table{border-collapse:collapse;width:100%}
+th,td{border-bottom:1px solid #eee;padding:8px 6px;text-align:left}
+th{font-weight:800}
+input{padding:.5rem;border:2px solid #e5e7eb;border-radius:8px}
+.top{display:flex;gap:12px;align-items:center;margin-bottom:12px}
+button{padding:.5rem .8rem;border:0;border-radius:8px;background:#243354;color:#fff;font-weight:800}
+</style>
+<div class="top">
+  <input id="key" placeholder="Admin key" type="password">
+  <button id="load">Load RSVPs</button>
+  <button id="csv">Download CSV</button>
+  <span id="status" style="margin-left:8px;color:#666"></span>
+  </div>
+<table id="t"><thead><tr><th>Name</th><th>Email</th><th>Attendance</th><th>Events</th><th>Notes</th><th>Updated</th></tr></thead><tbody></tbody></table>
+<script>
+const toCSV = rows => [Object.keys(rows[0]).join(','), ...rows.map(r=>Object.values(r).map(v=>`"${String(v||'').replace(/\"/g,'\"\"')}"`).join(','))].join('\n');
+document.getElementById('load').onclick = async () => {
+  const key = document.getElementById('key').value.trim();
+  const r = await fetch('/api/admin-list', { headers: { 'x-admin-key': key } });
+  const j = await r.json();
+  const status = document.getElementById('status');
+  if (!j.ok) { status.textContent = 'Auth failed'; return; }
+  status.textContent = '';
+  const tbody = document.querySelector('#t tbody'); tbody.innerHTML = '';
+  j.items.forEach(it => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${it.name||''}</td><td>${it.email||''}</td><td>${it.attendance||''}</td><td>${(it.selectedEvents||[]).join(' · ')}</td><td>${it.notes||''}</td><td>${new Date(+it.updatedAt||0).toLocaleString()}</td>`;
+    tbody.appendChild(tr);
+  });
+  document.getElementById('csv').onclick = () => {
+    if (!j.items.length) return alert('No rows');
+    const rows = j.items.map(({name,email,attendance,selectedEvents,notes,updatedAt}) => ({name,email,attendance,events:(selectedEvents||[]).join('|'),notes,updatedAt:new Date(+updatedAt||0).toISOString()}));
+    const blob = new Blob([toCSV(rows)], {type:'text/csv'}); const url = URL.createObjectURL(blob);
+    const a = Object.assign(document.createElement('a'), {href:url, download:'rsvps.csv'}); a.click(); URL.revokeObjectURL(url);
+  };
+};
+</script>
+
+
