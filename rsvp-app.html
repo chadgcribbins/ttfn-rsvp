@@ -273,7 +273,11 @@
           const j = await r.json();
           if (!j.ok) { alert('Error saving RSVP'); return; }
           successName.textContent = nameInput.value; if (j.editUrl) editLink.href = j.editUrl;
+          // Show success briefly, then take them straight to their personal edit link
           formView.classList.add('hidden'); successView.classList.remove('hidden');
+          if (j.editUrl) {
+            setTimeout(()=>{ window.location.href = j.editUrl; }, 350);
+          }
         });
 
         submitAnotherBtn.addEventListener('click', ()=>{ location.href = location.pathname; });

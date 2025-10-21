@@ -20,8 +20,9 @@ button{padding:.5rem .8rem;border:0;border-radius:8px;background:#243354;color:#
 <table id="t"><thead><tr><th>Name</th><th>Email</th><th>Attendance</th><th>Events</th><th>Notes</th><th>Updated</th></tr></thead><tbody></tbody></table>
 <script>
 const toCSV = rows => [Object.keys(rows[0]).join(','), ...rows.map(r=>Object.values(r).map(v=>`"${String(v||'').replace(/\"/g,'\"\"')}"`).join(','))].join('\n');
-document.getElementById('load').onclick = async () => {
-  const key = document.getElementById('key').value.trim();
+async function load() {
+  const keyInput = document.getElementById('key');
+  const key = keyInput.value.trim() || (typeof window !== 'undefined' ? (window.ADMIN_KEY || '') : '');
   const r = await fetch('/api/admin-list', { headers: { 'x-admin-key': key } });
   const j = await r.json();
   const status = document.getElementById('status');
@@ -39,7 +40,15 @@ document.getElementById('load').onclick = async () => {
     const blob = new Blob([toCSV(rows)], {type:'text/csv'}); const url = URL.createObjectURL(blob);
     const a = Object.assign(document.createElement('a'), {href:url, download:'rsvps.csv'}); a.click(); URL.revokeObjectURL(url);
   };
-};
+}
+
+document.getElementById('load').onclick = load;
+
+// Auto-fill key from query (?key=...) or from env var baked at build-time if present
+(function(){
+  const urlKey = new URLSearchParams(location.search).get('key');
+  if (urlKey) document.getElementById('key').value = urlKey;
+})();
 </script>
 
 
