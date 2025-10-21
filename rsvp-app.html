@@ -10,24 +10,40 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-      body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,Helvetica,Arial}
+      :root{
+        --text:#1f2a44;--muted:#5b6476;--border:#e8dcc0;--card:#fffdf6;--accent:#243354;--accent-700:#18243e;
+      }
+      body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,Helvetica,Arial;color:var(--text);
+        background:url('./images/EastLondon.png') center/cover fixed no-repeat; background-color:rgba(0,0,0,.10); background-blend-mode:multiply;}
       .container{max-width:720px;margin:0 auto;padding:24px 16px 48px}
-      .card{background:#fffdf6;border-radius:24px;padding:24px;box-shadow:0 16px 32px rgba(31,42,68,.15)}
+      .header{ text-align:center;color:var(--text);padding:24px 16px 20px;margin-bottom:16px;border-radius:20px;border:2px solid var(--border);background:var(--card)}
+      .header h1{margin:6px 0 6px;font-weight:900;letter-spacing:-.02em;font-size:34px}
+      .header p{margin:0 0 8px;font-size:16px;color:var(--muted)}
+      .header .bonus{display:block;background:#ffe9b5;color:#7c3b00;border:2px solid #f2cf7b;border-radius:12px;padding:10px 14px;font-weight:800;margin:12px auto 0;max-width:680px}
+      .card{background:var(--card);border-radius:24px;padding:24px;box-shadow:0 16px 32px rgba(31,42,68,.15)}
       .section-title{font-size:24px;font-weight:800;margin:0 0 16px}
       .label{display:block;font-size:13px;font-weight:700;color:#374151;margin-bottom:8px}
-      .input,.textarea{width:100%;border:2px solid #e8dcc0;border-radius:14px;padding:12px 14px;font-size:16px;background:#fff}
+      .input,.textarea{width:100%;border:2px solid var(--border);border-radius:14px;padding:12px 14px;font-size:16px;background:#fff}
       .textarea{resize:vertical;min-height:90px}
       .row{display:grid;grid-template-columns:1fr;gap:12px}
       @media(min-width:640px){.row.two{grid-template-columns:1fr 1fr}}
-      .btn{width:100%;border:0;border-radius:14px;padding:14px 16px;color:#fff;font-weight:700;font-size:17px;background:linear-gradient(90deg,#243354,#18243e);cursor:pointer}
+      .grid-3{display:grid;grid-template-columns:1fr;gap:12px}
+      @media(min-width:720px){.grid-3{grid-template-columns:repeat(3,1fr)}}
+      .btn{width:100%;border:0;border-radius:14px;padding:14px 16px;color:#fff;font-weight:700;font-size:17px;background:linear-gradient(90deg,var(--accent),var(--accent-700));cursor:pointer}
       .btn[disabled]{opacity:.5;cursor:not-allowed}
-      .choice{border:2px solid #e8dcc0;border-radius:16px;padding:14px;background:#fff;cursor:pointer}
-      .choice.selected{border-color:#243354;background:#eef2ff;color:#243354}
+      .choice{border:2px solid var(--border);border-radius:16px;padding:14px;background:#fff;cursor:pointer;text-align:left}
+      .choice.selected{border-color:var(--accent);background:#f5f3ff;color:#243354}
       .hidden{display:none!important}
     </style>
   </head>
   <body>
     <div class="container">
+      <header class="header">
+        <h1>The Cribbins TTFN London Weekend</h1>
+        <p>A celebration of our London years as we head on a new adventure in Lisbon</p>
+        <p style="font-weight:800;">25–26 October • East London</p>
+        <p class="bonus">🎉 Bonus Celebrations 🎉<br>Niyati & Chad’s Oct Birthdays (Chad hit the big 5‑0!)</p>
+      </header>
       <section id="form-view" class="card">
         <h2 class="section-title">RSVP</h2>
 
@@ -49,10 +65,19 @@
 
         <div>
           <label class="label">I'll be attending... *</label>
-          <div class="row two" id="attendance-group">
-            <button type="button" class="choice" data-attendance="all">All Weekend! 🎉<div style="font-size:12px;color:#6b7280">Everything</div></button>
-            <button type="button" class="choice" data-attendance="partial">Some Events 📅<div style="font-size:12px;color:#6b7280">I'll pick below</div></button>
-            <button type="button" class="choice" data-attendance="none">Can't Make It 😢<div style="font-size:12px;color:#6b7280">Next time!</div></button>
+          <div class="grid-3" id="attendance-group">
+            <button type="button" class="choice" data-attendance="all">
+              <div style="font-weight:700">All Weekend! 🎉</div>
+              <div style="font-size:12px;color:#6b7280">Everything</div>
+            </button>
+            <button type="button" class="choice" data-attendance="partial">
+              <div style="font-weight:700">Some Events 📅</div>
+              <div style="font-size:12px;color:#6b7280">I'll pick below</div>
+            </button>
+            <button type="button" class="choice" data-attendance="none">
+              <div style="font-weight:700">Sorry Can't Make It 😢</div>
+              <div style="font-size:12px;color:#6b7280">But we will visit 🇵🇹!</div>
+            </button>
           </div>
         </div>
 
