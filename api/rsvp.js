@@ -1,4 +1,21 @@
-const { kv } = require('@vercel/kv');
+let kv;
+try {
+  // Prefer @vercel/kv if available in the runtime
+  ({ kv } = require('@vercel/kv'));
+} catch (_) {
+  // Fallback to Upstash Redis directly when @vercel/kv is not present in the edge runtime
+  const { Redis } = require('@upstash/redis');
+  const client = new Redis({
+    url: process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL,
+    token: process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN,
+  });
+  kv = {
+    async hset(key, value) { return client.hset(key, value); },
+    async hgetall(key) { return client.hgetall(key); },
+    async sadd(key, member) { return client.sadd(key, member); },
+    async smembers(key) { return client.smembers(key); },
+  };
+}
 const { nanoid } = require('nanoid');
 
 module.exports = async (req, res) => {
@@ -52,7 +69,8 @@ module.exports = async (req, res) => {
 
     return res.status(405).json({ ok: false, error: 'Method not allowed' });
   } catch (e) {
-    return res.status(500).json({ ok: false, error: e.message });
+    console.error('RSVP API error:', e);
+    return res.status(500).json({ ok: false, error: e.message || 'Server error' });
   }
 };
 

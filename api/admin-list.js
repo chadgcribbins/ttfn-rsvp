@@ -1,4 +1,16 @@
-const { kv } = require('@vercel/kv');
+let kv;
+try { ({ kv } = require('@vercel/kv')); }
+catch (_) {
+  const { Redis } = require('@upstash/redis');
+  const client = new Redis({
+    url: process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL,
+    token: process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN,
+  });
+  kv = {
+    async hgetall(key) { return client.hgetall(key); },
+    async smembers(key) { return client.smembers(key); }
+  };
+}
 
 module.exports = async (req, res) => {
   res.setHeader('Content-Type', 'application/json');
