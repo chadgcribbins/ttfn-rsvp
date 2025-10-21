@@ -13,6 +13,7 @@
       :root{
         --text:#1f2a44;--muted:#5b6476;--border:#e8dcc0;--card:#fffdf6;--accent:#243354;--accent-700:#18243e;
       }
+      *{box-sizing:border-box}
       body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,Helvetica,Arial;color:var(--text);
         background:url('./images/EastLondon.png') center/cover fixed no-repeat; background-color:rgba(0,0,0,.10); background-blend-mode:multiply;}
       .container{max-width:720px;margin:0 auto;padding:24px 16px 48px}
@@ -31,9 +32,30 @@
       @media(min-width:720px){.grid-3{grid-template-columns:repeat(3,1fr)}}
       .btn{width:100%;border:0;border-radius:14px;padding:14px 16px;color:#fff;font-weight:700;font-size:17px;background:linear-gradient(90deg,var(--accent),var(--accent-700));cursor:pointer}
       .btn[disabled]{opacity:.5;cursor:not-allowed}
-      .choice{border:2px solid var(--border);border-radius:16px;padding:14px;background:#fff;cursor:pointer;text-align:left}
+      .choice{display:block;width:100%;border:2px solid var(--border);border-radius:16px;padding:14px;background:#fff;cursor:pointer;text-align:left}
       .choice.selected{border-color:var(--accent);background:#f5f3ff;color:#243354}
       .hidden{display:none!important}
+
+      /* Itinerary styles (match rsvp.html) */
+      .itin-card{background:#fbf6e8}
+      .itin-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+      .itin-title{font-size:24px;font-weight:800;margin:0}
+      .itin-sub{color:#4b5563;font-size:14px;margin:0}
+      .jump{border:2px solid var(--accent);background:#ffffff;color:var(--accent);padding:10px 14px;border-radius:999px;font-weight:800;cursor:pointer;text-decoration:none}
+      .jump:hover{background:#f5f3ff}
+      .day{margin-top:8px;border:2px solid #f3e7c6;border-radius:16px;padding:12px;background:#fffef7}
+      .day-title{font-weight:900;font-size:16px;margin:0 0 8px;color:#1f2937}
+      .item-row{display:grid;grid-template-columns:1fr;gap:6px;padding:10px 0;border-top:1px dashed #e6dec0}
+      .item-row:first-of-type{border-top:0;padding-top:0}
+      .item-head{display:flex;align-items:baseline;gap:8px}
+      .item-time{font-weight:800;color:#374151;min-width:90px}
+      .item-name{font-weight:800}
+      .links{display:flex;flex-wrap:wrap;gap:8px;font-size:13px}
+      .links a,.links a:visited{color:#bd3d13;text-decoration:none;font-weight:700}
+      .links a:hover{text-decoration:underline}
+      .weather{display:flex;align-items:center;justify-content:space-between;gap:10px;background:#558582;color:#ffffff;border-radius:12px;padding:6px 10px;font-weight:800}
+      .weather .left{display:flex;align-items:center;gap:8px}
+      .weather .temps{font-weight:700;color:inherit}
     </style>
   </head>
   <body>
@@ -44,6 +66,75 @@
         <p style="font-weight:800;">25–26 October • East London</p>
         <p class="bonus">🎉 Bonus Celebrations 🎉<br>Niyati & Chad’s Oct Birthdays (Chad hit the big 5‑0!)</p>
       </header>
+      <!-- Weekend Itinerary -->
+      <section class="card itin-card" style="margin-bottom:16px" id="itinerary">
+        <div class="itin-header">
+          <div>
+            <h2 class="itin-title">Weekend Itinerary</h2>
+            <p class="itin-sub">All the key details in one place</p>
+          </div>
+          <a class="jump" href="#form-view">Jump to RSVP</a>
+        </div>
+
+        <div class="day">
+          <p class="day-title">Saturday, 25 October</p>
+          <div class="weather"><div class="left"><span>Sat</span> <span>⛅</span></div><div class="temps">6°C / 11°C • 43°F / 51°F</div></div>
+          <div class="item-row">
+            <div class="item-head"><span class="item-time">10:30 AM</span> <span class="item-name">Brunch — Route Haggerston</span></div>
+            <div class="links">
+              <a href="https://caferoute.co.uk/haggerston/" target="_blank" rel="noopener">Website</a>
+              <a href="https://maps.app.goo.gl/ABNteUucNAKBAiDR9" target="_blank" rel="noopener">Location</a>
+              <a href="https://caferoute.co.uk/wp-content/uploads/2025/06/PDF-Breakfast-Summer-2025-Menu.pdf" target="_blank" rel="noopener">Menu</a>
+            </div>
+          </div>
+          <div class="item-row">
+            <div class="item-head"><span class="item-time">1–5 PM</span> <span class="item-name">Lunch — The Scolts Head</span></div>
+            <div class="links">
+              <a href="https://www.thescolthead.co.uk" target="_blank" rel="noopener">Website</a>
+              <a href="https://maps.app.goo.gl/jUqVAe5LyQctxBjB8?g_st=ic" target="_blank" rel="noopener">Location</a>
+              <a href="https://www.thescolthead.co.uk/scolt-head/wp-content/uploads/2018/07/SCOLTHEAD_SAMPLE_MENU_SEPT_2024.pdf" target="_blank" rel="noopener">Menu</a>
+            </div>
+          </div>
+          <div class="item-row">
+            <div class="item-head"><span class="item-time">6:00 PM</span> <span class="item-name">Dinner — Tonkotsu East</span></div>
+            <div class="links">
+              <a href="https://tonkotsu.co.uk/locations/east/" target="_blank" rel="noopener">Website</a>
+              <a href="https://maps.app.goo.gl/ir4x1HfnbgPcNfWs7?g_st=ic" target="_blank" rel="noopener">Location</a>
+              <a href="https://tonkotsu.co.uk/menu/ramen/" target="_blank" rel="noopener">Menu</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="day" style="margin-top:12px">
+          <p class="day-title">Sunday, 26 October</p>
+          <div class="weather"><div class="left"><span>Sun</span> <span>☀️</span></div><div class="temps">4°C / 9°C • 39°F / 49°F</div></div>
+          <div class="item-row">
+            <div class="item-head"><span class="item-time">11:30 AM</span> <span class="item-name">Morning Service — Saint Hackney</span></div>
+            <div class="links">
+              <a href="https://saint.church" target="_blank" rel="noopener">Website</a>
+              <a href="https://maps.app.goo.gl/V2XRCCARUKaGMg1q9?g_st=ipc" target="_blank" rel="noopener">Location</a>
+              <a href="https://saint.church/sunday/" target="_blank" rel="noopener">What’s on</a>
+            </div>
+          </div>
+          <div class="item-row">
+            <div class="item-head"><span class="item-time">2–6 PM</span> <span class="item-name">Lunch — Spitalfields Market</span></div>
+            <div class="links">
+              <a href="https://www.spitalfields.co.uk" target="_blank" rel="noopener">Website</a>
+              <a href="https://maps.app.goo.gl/ka2j4pL71syZUHHo9" target="_blank" rel="noopener">Location</a>
+              <a href="https://www.spitalfields.co.uk/food-drinks/" target="_blank" rel="noopener">Food & drinks</a>
+            </div>
+          </div>
+          <div class="item-row">
+            <div class="item-head"><span class="item-time">6:00 / 7:30 PM</span> <span class="item-name">Evening Movie — Options</span></div>
+            <div style="color:#4b5563;font-size:14px">We'll decide based on vibes; here are a few picks:</div>
+            <ul style="margin:6px 0 0 16px;color:#374151">
+              <li>Hackney Picturehouse — PHOTOMONTH Free Party: A Folk History (7:30PM)</li>
+              <li>Rich Mix — Skateboard Film Club: This Is Skateboarding (6:00PM)</li>
+              <li>Or Stratford — TBD</li>
+            </ul>
+          </div>
+        </div>
+      </section>
       <section id="form-view" class="card">
         <h2 class="section-title">RSVP</h2>
 
@@ -91,7 +182,7 @@
           <textarea id="notes" class="textarea" rows="3" placeholder="Bringing a plus one? Let us know!"></textarea>
         </div>
 
-        <button id="submit" class="btn" type="button" disabled>Submit RSVP</button>
+        <button id="submit" class="btn" type="button" disabled style="margin-top:8px">Submit RSVP</button>
         <p style="font-size:12px;color:#6b7280;text-align:center;margin-top:8px">You'll get a personal link to edit later</p>
       </section>
 
