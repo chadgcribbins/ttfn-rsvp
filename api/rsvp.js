@@ -1,20 +1,17 @@
-let kv;
-try {
-  // Prefer @vercel/kv if available in the runtime
-  ({ kv } = require('@vercel/kv'));
-} catch (_) {
-  // Fallback to Upstash Redis directly when @vercel/kv is not present in the edge runtime
-  const { Redis } = require('@upstash/redis');
-  const client = new Redis({
-    url: process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL,
-    token: process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN,
+// Lightweight Upstash REST client (works in any Node runtime)
+const BASE_URL = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
+const AUTH_TOKEN = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
+async function upstash(command, ...args) {
+  if (!BASE_URL || !AUTH_TOKEN) throw new Error('Missing Upstash REST env vars');
+  const res = await fetch(`${BASE_URL}/pipeline`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${AUTH_TOKEN}` },
+    body: JSON.stringify({ commands: [[command, ...args]] })
   });
-  kv = {
-    async hset(key, value) { return client.hset(key, value); },
-    async hgetall(key) { return client.hgetall(key); },
-    async sadd(key, member) { return client.sadd(key, member); },
-    async smembers(key) { return client.smembers(key); },
-  };
+  const json = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(json.error || 'Upstash request failed');
+  const result = Array.isArray(json) ? json[0]?.result : undefined;
+  return result;
 }
 const { nanoid } = require('nanoid');
 
@@ -33,8 +30,8 @@ module.exports = async (req, res) => {
       const id = nanoid(12);
       const record = { id, name, email, phone, attendance, selectedEvents, notes, createdAt: Date.now(), updatedAt: Date.now() };
 
-      await kv.hset(`rsvp:${editToken}`, record);
-      await kv.sadd('rsvp:index', editToken);
+      await upstash('SET', `rsvp:${editToken}`, JSON.stringify(record));
+      await upstash('SADD', 'rsvp:index', editToken);
 
       const base = (req.headers['x-forwarded-proto'] || 'https') + '://' + req.headers.host;
       return res.status(201).json({ ok: true, id, editToken, editUrl: `${base}/edit.html?token=${editToken}` });
@@ -42,14 +39,16 @@ module.exports = async (req, res) => {
 
     if (method === 'GET') {
       if (!token) return res.status(400).json({ ok: false, error: 'Missing token' });
-      const record = await kv.hgetall(`rsvp:${token}`);
+      const str = await upstash('GET', `rsvp:${token}`);
+      const record = str ? JSON.parse(str) : null;
       if (!record || !record.id) return res.status(404).json({ ok: false, error: 'Not found' });
       return res.json({ ok: true, rsvp: record });
     }
 
     if (method === 'PUT') {
       if (!token) return res.status(400).json({ ok: false, error: 'Missing token' });
-      const existing = await kv.hgetall(`rsvp:${token}`);
+      const existingStr = await upstash('GET', `rsvp:${token}`);
+      const existing = existingStr ? JSON.parse(existingStr) : null;
       if (!existing || !existing.id) return res.status(404).json({ ok: false, error: 'Not found' });
 
       const { name, email, phone = '', attendance, selectedEvents = [], notes = '' } = body;
@@ -63,7 +62,7 @@ module.exports = async (req, res) => {
         updatedAt: Date.now()
       };
 
-      await kv.hset(`rsvp:${token}`, updated);
+      await upstash('SET', `rsvp:${token}`, JSON.stringify(updated));
       return res.json({ ok: true });
     }
 
