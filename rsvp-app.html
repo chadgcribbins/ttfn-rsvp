@@ -28,6 +28,9 @@
       .textarea{resize:vertical;min-height:90px}
       .row{display:grid;grid-template-columns:1fr;gap:12px}
       @media(min-width:640px){.row.two{grid-template-columns:1fr 1fr}}
+      /* name + party layout */
+      .row.name-party{grid-template-columns:1fr}
+      @media(min-width:640px){.row.name-party{grid-template-columns:2fr 1fr}}
       .grid-3{display:grid;grid-template-columns:1fr;gap:12px}
       @media(min-width:720px){.grid-3{grid-template-columns:repeat(3,1fr)}}
       .btn{width:100%;border:0;border-radius:14px;padding:14px 16px;color:#fff;font-weight:700;font-size:17px;background:linear-gradient(90deg,var(--accent),var(--accent-700));cursor:pointer}
@@ -138,14 +141,11 @@
       <section id="form-view" class="card">
         <h2 class="section-title">RSVP</h2>
 
-        <div class="row">
+        <div class="row name-party">
           <div>
             <label class="label" for="name">Your Name *</label>
             <input id="name" class="input" type="text" placeholder="John Doe" required>
           </div>
-        </div>
-
-        <div class="row two">
           <div>
             <label class="label" for="party">How many people? *</label>
             <input id="party" class="input" type="number" min="1" step="1" placeholder="1">
@@ -271,8 +271,9 @@
             notes: notesInput.value.trim()
           };
           const r = await fetch('/api/rsvp', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
-          const j = await r.json();
-          if (!j.ok) { alert('Error saving RSVP'); return; }
+          let j;
+          try { j = await r.json(); } catch (e) { const t = await r.text(); alert(t || 'Error saving RSVP'); return; }
+          if (!j.ok) { alert(j.error || 'Error saving RSVP'); return; }
           successName.textContent = nameInput.value; if (j.editUrl) editLink.href = j.editUrl;
           // Show success briefly, then take them straight to their personal edit link
           formView.classList.add('hidden'); successView.classList.remove('hidden');
@@ -284,7 +285,7 @@
         submitAnotherBtn.addEventListener('click', ()=>{ location.href = location.pathname; });
       })();
     </script>
-    <div style="text-align:center;color:#5b6476;font-size:12px;padding:12px 0">Version V0.7</div>
+    <div style="text-align:center;color:#5b6476;font-size:12px;padding:12px 0">Version V0.8</div>
   </body>
 </html>
 
