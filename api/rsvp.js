@@ -1,6 +1,9 @@
 // Lightweight Upstash REST client (works in any Node runtime)
 const BASE_URL = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
 const AUTH_TOKEN = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
+const { randomUUID } = require('crypto');
+function generateToken() { return (randomUUID && randomUUID().replace(/-/g, '')) || Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2); }
+function generateId() { return generateToken().slice(0, 12); }
 async function upstash(command, ...args) {
   if (!BASE_URL || !AUTH_TOKEN) throw new Error('Missing Upstash REST env vars');
   const res = await fetch(`${BASE_URL}/pipeline`, {
@@ -28,8 +31,8 @@ module.exports = async (req, res) => {
       const { name, email, phone = '', attendance, selectedEvents = [], notes = '' } = body;
       if (!name || !email || !attendance) return res.status(400).json({ ok: false, error: 'Missing fields' });
 
-      const editToken = nanoid(32);
-      const id = nanoid(12);
+      const editToken = generateToken();
+      const id = generateId();
       const record = { id, name, email, phone, attendance, selectedEvents, notes, createdAt: Date.now(), updatedAt: Date.now() };
 
       await upstash('SET', `rsvp:${editToken}`, JSON.stringify(record));
