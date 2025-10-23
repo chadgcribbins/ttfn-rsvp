@@ -5,7 +5,7 @@ async function upstash(command, ...args) {
   const res = await fetch(`${BASE_URL}/pipeline`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${AUTH_TOKEN}` },
-    body: JSON.stringify({ commands: [[command, ...args]] })
+    body: JSON.stringify([[command, ...args]])
   });
   const text = await res.text();
   let json; try { json = JSON.parse(text); } catch { json = null; }
