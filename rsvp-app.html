@@ -138,20 +138,18 @@
       <section id="form-view" class="card">
         <h2 class="section-title">RSVP</h2>
 
-        <div class="row two">
+        <div class="row">
           <div>
             <label class="label" for="name">Your Name *</label>
             <input id="name" class="input" type="text" placeholder="John Doe" required>
           </div>
-          <div>
-            <label class="label" for="email">Email *</label>
-            <input id="email" class="input" type="email" placeholder="john@example.com" required>
-          </div>
         </div>
 
-        <div>
-          <label class="label" for="phone">Phone (Optional)</label>
-          <input id="phone" class="input" type="tel" placeholder="+44 7XXX XXXXXX">
+        <div class="row two">
+          <div>
+            <label class="label" for="party">How many people? *</label>
+            <input id="party" class="input" type="number" min="1" step="1" placeholder="1">
+          </div>
         </div>
 
         <div>
@@ -178,8 +176,8 @@
         </div>
 
         <div style="margin-top:12px">
-          <label class="label" for="notes">Any Notes or Special Requests?</label>
-          <textarea id="notes" class="textarea" rows="3" placeholder="Bringing a plus one? Let us know!"></textarea>
+          <label class="label" for="notes">Is there anything you need to share with us?</label>
+          <textarea id="notes" class="textarea" rows="3" placeholder="I love stinky cheese"></textarea>
         </div>
 
         <button id="submit" class="btn" type="button" disabled style="margin-top:8px">Submit RSVP</button>
@@ -211,8 +209,7 @@
         const eventsSection = document.getElementById('events-section');
         const eventsList = document.getElementById('events-list');
         const nameInput = document.getElementById('name');
-        const emailInput = document.getElementById('email');
-        const phoneInput = document.getElementById('phone');
+        const partyInput = document.getElementById('party');
         const notesInput = document.getElementById('notes');
         const submitBtn = document.getElementById('submit');
         const formView = document.getElementById('form-view');
@@ -256,18 +253,22 @@
         }
 
         attendanceGroup.addEventListener('click', e=>{ const btn=e.target.closest('.choice'); if(!btn) return; setAttendance(btn.getAttribute('data-attendance')); });
-        [nameInput,emailInput,phoneInput,notesInput].forEach(el=>el.addEventListener('input', validate));
+        [nameInput,partyInput,notesInput].forEach(el=>el.addEventListener('input', validate));
 
         function validate(){
           const hasEventIfPartial = attendance!=='partial' || getSelectedEventIds().length>0;
-          submitBtn.disabled = !(nameInput.value.trim() && emailInput.value.trim() && attendance && hasEventIfPartial);
+          const partyOk = Number(partyInput.value) > 0;
+          submitBtn.disabled = !(nameInput.value.trim() && partyOk && hasEventIfPartial);
         }
 
         submitBtn.addEventListener('click', async ()=>{
           if (submitBtn.disabled) return;
           const payload = {
-            name: nameInput.value.trim(), email: emailInput.value.trim(), phone: phoneInput.value.trim(),
-            attendance, selectedEvents: getSelectedEventIds(), notes: notesInput.value.trim()
+            name: nameInput.value.trim(),
+            partySize: Number(partyInput.value) || 1,
+            attendance,
+            selectedEvents: getSelectedEventIds(),
+            notes: notesInput.value.trim()
           };
           const r = await fetch('/api/rsvp', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
           const j = await r.json();
@@ -283,6 +284,7 @@
         submitAnotherBtn.addEventListener('click', ()=>{ location.href = location.pathname; });
       })();
     </script>
+    <div style="text-align:center;color:#5b6476;font-size:12px;padding:12px 0">Version V0.7</div>
   </body>
 </html>
 
