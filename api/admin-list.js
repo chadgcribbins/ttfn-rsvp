@@ -7,8 +7,9 @@ async function upstash(command, ...args) {
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${AUTH_TOKEN}` },
     body: JSON.stringify({ commands: [[command, ...args]] })
   });
-  const json = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(json.error || 'Upstash request failed');
+  const text = await res.text();
+  let json; try { json = JSON.parse(text); } catch { json = null; }
+  if (!res.ok) throw new Error((json && (json.error || json[0]?.error)) || text || 'Upstash request failed');
   const result = Array.isArray(json) ? json[0]?.result : undefined;
   return result;
 }
