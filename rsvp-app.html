@@ -272,9 +272,15 @@
             notes: notesInput.value.trim()
           };
           const r = await fetch('/api/rsvp', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+          const rc = r.clone();
           let j;
-          try { j = await r.json(); } catch (e) { const t = await r.text(); alert(t || 'Error saving RSVP'); return; }
-          if (!j.ok) { alert(j.error || 'Error saving RSVP'); return; }
+          try { j = await r.json(); }
+          catch (e) {
+            const t = await rc.text().catch(()=> '');
+            alert(t || 'Error saving RSVP');
+            return;
+          }
+          if (!j || !j.ok) { alert((j && j.error) || 'Error saving RSVP'); return; }
           successName.textContent = nameInput.value; if (j.editUrl) editLink.href = j.editUrl;
           // Show success briefly, then take them straight to their personal edit link
           formView.classList.add('hidden'); successView.classList.remove('hidden');
@@ -286,7 +292,7 @@
         submitAnotherBtn.addEventListener('click', ()=>{ location.href = location.pathname; });
       })();
     </script>
-    <div style="text-align:center;color:#5b6476;font-size:12px;padding:12px 0">Version V0.10</div>
+    <div style="text-align:center;color:#5b6476;font-size:12px;padding:12px 0">Version V0.11</div>
   </body>
 </html>
 
