@@ -19,7 +19,7 @@ async function upstash(command, ...args) {
   const result = Array.isArray(json) ? json[0]?.result : undefined;
   return result;
 }
-const { nanoid } = require('nanoid');
+// no external id lib required; we use crypto-based ids
 
 module.exports = async (req, res) => {
   res.setHeader('Content-Type', 'application/json');
@@ -29,12 +29,12 @@ module.exports = async (req, res) => {
 
   try {
     if (method === 'POST') {
-      const { name, email, phone = '', attendance, selectedEvents = [], notes = '' } = body;
-      if (!name || !email || !attendance) return res.status(400).json({ ok: false, error: 'Missing fields' });
+      const { name, partySize = 1, attendance, selectedEvents = [], notes = '', email = '', phone = '' } = body;
+      if (!name || !attendance) return res.status(400).json({ ok: false, error: 'Missing name or attendance' });
 
       const editToken = generateToken();
       const id = generateId();
-      const record = { id, name, email, phone, attendance, selectedEvents, notes, createdAt: Date.now(), updatedAt: Date.now() };
+      const record = { id, name, partySize, email, phone, attendance, selectedEvents, notes, createdAt: Date.now(), updatedAt: Date.now() };
 
       await upstash('SET', `rsvp:${editToken}`, JSON.stringify(record));
       await upstash('SADD', 'rsvp:index', editToken);
