@@ -3,22 +3,22 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Edit RSVP</title>
 <style>
-body{font:16px/1.4 Inter,system-ui;-webkit-font-smoothing:antialiased;margin:24px;background:#fffdf6}
-.wrap{max-width:720px;margin:0 auto}
+body{font:16px/1.4 Inter,system-ui;-webkit-font-smoothing:antialiased;margin:0;min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:24px;background:url('./images/HackneyWick.png') center/cover fixed no-repeat;background-color:rgba(0,0,0,.08);background-blend-mode:multiply}
+.wrap{max-width:720px;margin:0 auto;background:#fffdf6;border-radius:16px;padding:24px;box-shadow:0 16px 32px rgba(31,42,68,.15)}
 label{font-weight:700;display:block;margin:.75rem 0 .25rem}
 input,textarea,select,button{font:inherit}
 input,textarea,select{width:100%;padding:.6rem;border:2px solid #e5e7eb;border-radius:10px;background:#fff}
 button{margin-top:12px;padding:.7rem 1rem;border:0;border-radius:10px;background:#243354;color:#fff;font-weight:800}
-.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.row{display:grid;grid-template-columns:2fr 1fr;gap:12px}
+.hint{font-size:12px;color:#6b7280;margin-top:4px}
 </style>
 <div class="wrap">
   <h1>Edit your RSVP</h1>
   <div id="status"></div>
   <div class="row">
-    <div><label>Name</label><input id="name"></div>
-    <div><label>Email</label><input id="email"></div>
+    <div><label>Your Name *</label><input id="name"></div>
+    <div><label>How many people? *</label><input id="party" type="number" min="1" step="1" placeholder="1"></div>
   </div>
-  <label>Phone</label><input id="phone">
   <label>Attendance</label>
   <select id="attendance">
     <option value="all">All weekend</option>
@@ -27,8 +27,8 @@ button{margin-top:12px;padding:.7rem 1rem;border:0;border-radius:10px;background
   </select>
   <label>Selected Events (comma separated ids)</label>
   <input id="events" placeholder="sat-brunch,sat-lunch">
-  <label>Notes</label>
-  <textarea id="notes" rows="3"></textarea>
+  <label>Is there anything you need to share with us?</label>
+  <textarea id="notes" rows="3" placeholder="I love stinky cheese"></textarea>
   <button id="save">Save Changes</button>
 </div>
 <script>
@@ -41,8 +41,7 @@ fetch('/api/rsvp?token=' + encodeURIComponent(token))
   .then(r => r.json()).then(({ ok, rsvp, error }) => {
     if (!ok) throw new Error(error || 'load failed');
     $('name').value = rsvp.name || '';
-    $('email').value = rsvp.email || '';
-    $('phone').value = rsvp.phone || '';
+    $('party').value = rsvp.partySize || 1;
     $('attendance').value = rsvp.attendance || '';
     $('events').value = (rsvp.selectedEvents || []).join(',');
     $('notes').value = rsvp.notes || '';
@@ -52,8 +51,7 @@ $('save').onclick = async () => {
   const payload = {
     token,
     name: $('name').value.trim(),
-    email: $('email').value.trim(),
-    phone: $('phone').value.trim(),
+    partySize: Number($('party').value)||1,
     attendance: $('attendance').value,
     selectedEvents: $('events').value.split(',').map(s => s.trim()).filter(Boolean),
     notes: $('notes').value.trim()
