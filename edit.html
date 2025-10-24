@@ -9,7 +9,7 @@ label{font-weight:700;display:block;margin:.75rem 0 .25rem}
 input,textarea,select,button{font:inherit}
 input,textarea,select{width:100%;padding:.6rem;border:2px solid #e5e7eb;border-radius:10px;background:#fff}
 button{margin-top:12px;padding:.7rem 1rem;border:0;border-radius:10px;background:#243354;color:#fff;font-weight:800}
-.row{display:grid;grid-template-columns:2fr 1fr;gap:12px}
+.row{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:12px}
 .hint{font-size:12px;color:#6b7280;margin-top:4px}
 </style>
 <div class="wrap">
@@ -43,7 +43,6 @@ fetch('/api/rsvp?token=' + encodeURIComponent(token))
     $('name').value = rsvp.name || '';
     $('party').value = rsvp.partySize || 1;
     $('attendance').value = rsvp.attendance || '';
-    $('events').value = (rsvp.selectedEvents || []).join(',');
     $('notes').value = rsvp.notes || '';
   }).catch(e => { document.getElementById('status').textContent = e.message; });
 
