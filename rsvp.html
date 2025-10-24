@@ -305,6 +305,7 @@
               <div class="label" style="margin-bottom:4px;">Next Step</div>
               <p style="margin:0; color:#6b7280; font-size:14px;">Please send your RSVP via WhatsApp, Instagram DM, or text message to the organizers.</p>
             </div>
+            <button id="whatsapp-btn" class="btn" type="button" style="margin-bottom:8px;">Send via WhatsApp</button>
             <div class="row two">
               <button id="copy-again" class="btn" type="button">Copy RSVP Again</button>
               <button id="submit-another" class="choice" type="button" style="text-align:center;">Submit Another RSVP</button>
@@ -316,6 +317,7 @@
 
     <script>
       (function() {
+        const whatsappNumber = '447904415423';
         const events = [
           { id: 'sat-brunch', day: 'Saturday', time: '10:30 AM', name: 'Brunch', location: 'Route Haggerston' },
           { id: 'sat-lunch', day: 'Saturday', time: '1–5 PM',   name: 'Lunch',  location: 'The Scolts Head' },
@@ -466,6 +468,11 @@
           });
         }
 
+        function openWhatsAppWith(text) {
+          const url = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(text)}`;
+          window.open(url, '_blank');
+        }
+
         function renderPreview() {
           const hasEventIfPartial = attendance !== 'partial' || getSelectedEventIds().length > 0;
           const ready = nameInput.value.trim() && emailInput.value.trim() && attendance && hasEventIfPartial;
@@ -537,6 +544,7 @@
             successName.textContent = nameInput.value;
             formView.classList.add('hidden');
             successView.classList.remove('hidden');
+            setTimeout(function(){ openWhatsAppWith(text); }, 200);
           });
         });
 
@@ -544,6 +552,11 @@
           copyToClipboard(generateRSVPText()).then(function(){
             alert('RSVP copied to clipboard again!');
           });
+        });
+
+        const whatsappBtn = document.getElementById('whatsapp-btn');
+        whatsappBtn.addEventListener('click', function(){
+          openWhatsAppWith(generateRSVPText());
         });
 
         submitAnotherBtn.addEventListener('click', function(){
