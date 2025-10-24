@@ -72,6 +72,15 @@ module.exports = async (req, res) => {
       return res.json({ ok: true });
     }
 
+    if (method === 'DELETE') {
+      if (!token) return res.status(400).json({ ok: false, error: 'Missing token' });
+      // delete rsvp and remove from index set
+      await upstash('DEL', `rsvp:${token}`);
+      // best-effort remove; ignore result
+      await upstash('SREM', 'rsvp:index', token).catch(()=>{});
+      return res.json({ ok: true });
+    }
+
     return res.status(405).json({ ok: false, error: 'Method not allowed' });
   } catch (e) {
     console.error('RSVP API error:', e);

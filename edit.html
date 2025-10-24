@@ -25,8 +25,8 @@ button{margin-top:12px;padding:.7rem 1rem;border:0;border-radius:10px;background
     <option value="partial">Some events</option>
     <option value="none">Can't make it</option>
   </select>
-  <label>Selected Events (comma separated ids)</label>
-  <input id="events" placeholder="sat-brunch,sat-lunch">
+  <label>Events you'll attend</label>
+  <div id="events-list"></div>
   <label>Is there anything you need to share with us?</label>
   <textarea id="notes" rows="3" placeholder="I love stinky cheese"></textarea>
   <button id="save">Save Changes</button>
@@ -53,7 +53,7 @@ $('save').onclick = async () => {
     name: $('name').value.trim(),
     partySize: Number($('party').value)||1,
     attendance: $('attendance').value,
-    selectedEvents: $('events').value.split(',').map(s => s.trim()).filter(Boolean),
+    selectedEvents: Array.from(document.querySelectorAll('#events-list input[type="checkbox"]:checked')).map(cb=>cb.value),
     notes: $('notes').value.trim()
   };
   const r = await fetch('/api/rsvp?token=' + encodeURIComponent(token), {
@@ -62,6 +62,41 @@ $('save').onclick = async () => {
   const j = await r.json();
   alert(j.ok ? 'Saved!' : ('Error: ' + (j.error || 'failed')));
 };
+</script>
+
+<script>
+// Build RSVP-like event list UI
+(function(){
+  const events = [
+    { id: 'sat-brunch', day: 'Saturday', time: '10:30 AM', name: 'Brunch', location: 'Route Haggerston' },
+    { id: 'sat-lunch', day: 'Saturday', time: '1–5 PM',   name: 'Lunch',  location: 'The Scolts Head' },
+    { id: 'sat-dinner', day: 'Saturday', time: '6:00 PM',   name: 'Dinner', location: 'Tonkotsu East' },
+    { id: 'sun-church', day: 'Sunday',   time: '11:30 AM',  name: 'Morning Service', location: 'Saint Hackney' },
+    { id: 'sun-lunch',  day: 'Sunday',   time: '2–6 PM',    name: 'Lunch',  location: 'Spitalfields Market' },
+    { id: 'sun-movie',  day: 'Sunday',   time: '6/7:30 PM', name: 'Movie Night', location: 'TBD' }
+  ];
+  const list = document.getElementById('events-list');
+  if (!list) return;
+  ['Saturday','Sunday'].forEach(day => {
+    const dayHeader = document.createElement('div');
+    dayHeader.textContent = day; dayHeader.style.cssText='font-weight:800;color:#4b5563;margin:8px 0';
+    list.appendChild(dayHeader);
+    events.filter(e=>e.day===day).forEach(event => {
+      const row = document.createElement('label');
+      row.style.cssText='display:flex;align-items:flex-start;justify-content:space-between;border:2px solid #e5e7eb;border-radius:10px;padding:12px 14px;margin-bottom:8px;background:#fff';
+      const left = document.createElement('div');
+      left.innerHTML = `<div style="font-weight:700;color:#111827">${event.name}</div><div style="font-size:13px;color:#6b7280">${event.time} • ${event.location}</div>`;
+      const cb = document.createElement('input'); cb.type='checkbox'; cb.value=event.id; cb.style.marginLeft='12px';
+      row.appendChild(left); row.appendChild(cb); list.appendChild(row);
+    });
+  });
+  // prefill from loaded RSVP
+  fetch('/api/rsvp?token=' + encodeURIComponent(new URLSearchParams(location.search).get('token')))
+    .then(r=>r.json()).then(({ok,rsvp})=>{
+      if(!ok||!rsvp) return; const set = new Set(rsvp.selectedEvents||[]);
+      document.querySelectorAll('#events-list input[type="checkbox"]').forEach(cb=>{ cb.checked = set.has(cb.value); });
+    }).catch(()=>{});
+})();
 </script>
 
 

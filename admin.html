@@ -11,13 +11,13 @@ input{padding:.5rem;border:2px solid #e5e7eb;border-radius:8px}
 .top{display:flex;gap:12px;align-items:center;margin-bottom:12px}
 button{padding:.5rem .8rem;border:0;border-radius:8px;background:#243354;color:#fff;font-weight:800}
 </style>
-<div class="top">
+<form class="top" onsubmit="return false;">
   <input id="key" placeholder="Admin key" type="password">
   <button id="load">Load RSVPs</button>
   <button id="csv">Download CSV</button>
   <span id="status" style="margin-left:8px;color:#666"></span>
-  </div>
-<table id="t"><thead><tr><th>Name</th><th>Email</th><th>Attendance</th><th>Events</th><th>Notes</th><th>Updated</th></tr></thead><tbody></tbody></table>
+  </form>
+<table id="t"><thead><tr><th>Name</th><th>Party</th><th>Attendance</th><th>Events</th><th>Notes</th><th>Updated</th><th></th></tr></thead><tbody></tbody></table>
 <script>
 const toCSV = rows => [Object.keys(rows[0]).join(','), ...rows.map(r=>Object.values(r).map(v=>`"${String(v||'').replace(/\"/g,'\"\"')}"`).join(','))].join('\n');
 async function load() {
@@ -31,8 +31,18 @@ async function load() {
   const tbody = document.querySelector('#t tbody'); tbody.innerHTML = '';
   j.items.forEach(it => {
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${it.name||''}</td><td>${it.email||''}</td><td>${it.attendance||''}</td><td>${(it.selectedEvents||[]).join(' · ')}</td><td>${it.notes||''}</td><td>${new Date(+it.updatedAt||0).toLocaleString()}</td>`;
+    tr.innerHTML = `<td>${it.name||''}</td><td>${it.partySize||1}</td><td>${it.attendance||''}</td><td>${(it.selectedEvents||[]).join(' · ')}</td><td>${it.notes||''}</td><td>${new Date(+it.updatedAt||0).toLocaleString()}</td><td><button data-token="${it.token}">Delete</button></td>`;
     tbody.appendChild(tr);
+  });
+  // delete handlers
+  tbody.addEventListener('click', async (e)=>{
+    const btn = e.target.closest('button[data-token]');
+    if(!btn) return; if(!confirm('Delete this RSVP?')) return;
+    const tok = btn.getAttribute('data-token');
+    const r = await fetch('/api/rsvp?token='+encodeURIComponent(tok), { method:'DELETE' });
+    const j = await r.json().catch(()=>({ok:false}));
+    if(!j.ok) return alert('Delete failed');
+    btn.closest('tr').remove();
   });
   document.getElementById('csv').onclick = () => {
     if (!j.items.length) return alert('No rows');
