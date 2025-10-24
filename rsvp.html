@@ -119,6 +119,9 @@
 
       .row { display: grid; grid-template-columns: 1fr; gap: 12px; }
       @media (min-width: 640px) { .row.two { grid-template-columns: 1fr 1fr; } }
+      /* Match rsvp-app.html name + party layout */
+      .row.name-party{ grid-template-columns: 1fr; }
+      @media (min-width: 640px) { .row.name-party{ grid-template-columns: 2fr 1fr; } }
       .hidden { display: none !important; }
 
       /* Itinerary styles */
@@ -240,20 +243,15 @@
           <a id="rsvp"></a>
           <h2 class="section-title">RSVP</h2>
 
-          <div class="row two">
+          <div class="row name-party">
             <div class="field">
               <label class="label" for="name">Your Name *</label>
               <input id="name" class="input" type="text" placeholder="John Doe" required>
             </div>
             <div class="field">
-              <label class="label" for="email">Email *</label>
-              <input id="email" class="input" type="email" placeholder="john@example.com" required>
+              <label class="label" for="party">How many people? *</label>
+              <input id="party" class="input" type="number" min="1" step="1" placeholder="1">
             </div>
-          </div>
-
-          <div class="field">
-            <label class="label" for="phone">Phone (Optional)</label>
-            <input id="phone" class="input" type="tel" placeholder="+44 7XXX XXXXXX">
           </div>
 
           <div class="field">
@@ -280,8 +278,8 @@
           </div>
 
           <div class="field">
-            <label class="label" for="notes">Any Notes or Special Requests?</label>
-            <textarea id="notes" class="textarea" rows="3" placeholder="Bringing a plus one? Let us know!"></textarea>
+            <label class="label" for="notes">Is there anything you need to share with us?</label>
+            <textarea id="notes" class="textarea" rows="3" placeholder="I love stinky cheese"></textarea>
           </div>
 
           <div id="preview-wrap" class="field hidden">
@@ -334,8 +332,7 @@
         const eventsSection = document.getElementById('events-section');
         const eventsList = document.getElementById('events-list');
         const nameInput = document.getElementById('name');
-        const emailInput = document.getElementById('email');
-        const phoneInput = document.getElementById('phone');
+        const partyInput = document.getElementById('party');
         const notesInput = document.getElementById('notes');
         const previewWrap = document.getElementById('preview-wrap');
         const preview = document.getElementById('preview');
@@ -429,8 +426,10 @@
           lines.push('🎉 RSVP for Cribbins London Weekend 🎉');
           lines.push('');
           lines.push('Name: ' + nameInput.value);
-          lines.push('Email: ' + emailInput.value);
-          lines.push('Phone: ' + (phoneInput.value || 'Not provided'));
+          if (attendance !== 'none') {
+            var size = Number(partyInput.value) || 1;
+            lines.push('Party Size: ' + size);
+          }
           lines.push('');
           lines.push('Attending: ' + (attendance === 'all' ? '✅ All Weekend!' : attendance === 'partial' ? '📅 Selected Events' : '😢 Unable to Attend'));
           lines.push('');
@@ -475,7 +474,8 @@
 
         function renderPreview() {
           const hasEventIfPartial = attendance !== 'partial' || getSelectedEventIds().length > 0;
-          const ready = nameInput.value.trim() && emailInput.value.trim() && attendance && hasEventIfPartial;
+          const partyOk = Number(partyInput.value) > 0;
+          const ready = nameInput.value.trim() && partyOk && attendance && hasEventIfPartial;
           previewWrap.classList.toggle('hidden', !ready);
           if (ready) {
             preview.textContent = generateRSVPText();
@@ -486,14 +486,14 @@
 
         function validate() {
           const hasEventIfPartial = attendance !== 'partial' || getSelectedEventIds().length > 0;
-          const valid = nameInput.value.trim() && emailInput.value.trim() && attendance && hasEventIfPartial;
+          const partyOk = Number(partyInput.value) > 0;
+          const valid = nameInput.value.trim() && partyOk && attendance && hasEventIfPartial;
           submitBtn.disabled = !valid;
         }
 
         function resetForm() {
           nameInput.value = '';
-          emailInput.value = '';
-          phoneInput.value = '';
+          partyInput.value = '';
           notesInput.value = '';
           setAttendance('');
           Array.prototype.forEach.call(attendanceGroup.querySelectorAll('.choice'), function(btn) { btn.classList.remove('selected'); });
@@ -512,7 +512,7 @@
           setAttendance(value);
         });
 
-        [nameInput, emailInput, phoneInput, notesInput].forEach(function(el) {
+        [nameInput, partyInput, notesInput].forEach(function(el) {
           el.addEventListener('input', function(){ validate(); renderPreview(); });
         });
 
@@ -524,21 +524,11 @@
         });
 
         submitBtn.addEventListener('click', function(){
-          if (!nameInput.value.trim() || !emailInput.value.trim() || !attendance) {
+          const partyOk = Number(partyInput.value) > 0;
+          if (!nameInput.value.trim() || !partyOk || !attendance) {
             alert('Please fill in all required fields.');
             return;
           }
-          const payload = {
-            name: nameInput.value,
-            email: emailInput.value,
-            phone: phoneInput.value,
-            attendance: attendance,
-            selectedEvents: getSelectedEventIds(),
-            notes: notesInput.value,
-            timestamp: new Date().toISOString()
-          };
-          console.log('RSVP Submitted:', payload);
-
           const text = generateRSVPText();
           copyToClipboard(text).finally(function(){
             successName.textContent = nameInput.value;
